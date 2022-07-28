@@ -1,8 +1,12 @@
+from pathlib import Path
+
+import pandas as pd
 from selenium import webdriver
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service
 
-from path_reference.folder_reference import get_driver_path
+from path_reference.folder_reference import get_driver_path, get_data_path
 
 
 class WitcherScrapper:
@@ -11,32 +15,53 @@ class WitcherScrapper:
         self.driver = webdriver.Firefox(service=s)
         self.page_url: str = "https://witcher.fandom.com/wiki/Category:Characters_in_the_stories"
 
-    def load_website(self):
+    def __load_website(self) -> None:
         self.driver.get(self.page_url)
-        self.close_cookies_window()
+        self.driver.implicitly_wait(1)
+        self.__close_cookies_window()
 
-    def close_cookies_window(self):
-        self.driver.find_element(By.XPATH, "/html/body/div[7]/div/div/div[2]/div[2]").click()
+    def __close_cookies_window(self) -> None:
+        try:
+            button = self.driver.find_element(By.CSS_SELECTOR, ".NN0_TB_DIsNmMHgJWgT7U")
+            button.click()
+        except NoSuchElementException:
+            print("Could not close cookies window")
 
-    def get_book_list(self):
+    def __get_book_list(self) -> dict:
         raw_categories = self.driver.find_elements(By.CLASS_NAME, "category-page__member-link")
-        return [book.get_attribute("href") for book in raw_categories]
+        return {self.__fix_book_name(book.get_attribute("title")): book.get_attribute("href")
+                for book in raw_categories}
 
-    def get_book_content(self, book_link):
+    def __get_book_content(self, book_link) -> list[str]:
         self.driver.get(book_link)
         character_content = self.driver.find_elements(By.CLASS_NAME, "category-page__member-link")
         return [item.text for item in character_content]
 
-    def pipeline(self):
-        book_links = self.get_book_list()
-        for book_link in book_links:
-            yield self.get_book_content(book_link)
+    @staticmethod
+    def __fix_book_name(input_string) -> str:
+        sentence = input_string.split(":")[-1].split(" ")[:-1]
+        return ' '.join(sentence).replace("\"", "")
+
+    def __get_book_table(self) -> list[dict]:
+        self.__load_website()
+        book_table: dict = self.__get_book_list()
+        character_pot = []
+        for book_name, book_link in book_table.items():
+            current_book_characters: list = self.__get_book_content(book_link)
+            character_pot.extend({"book": book_name, "character": character}
+                                 for character in current_book_characters)
+        return character_pot
+
+    def export_dataframe(self) -> None:
+        df = pd.DataFrame(self.__get_book_table())
+        df.to_csv(Path(get_data_path(), "characters.csv"), index=False)
+        self.driver.close()
 
 
 def __main():
     ws = WitcherScrapper()
-    ws.pipeline()
-    # ws.get_book_list()
+    ws.export_dataframe()
+    print("done")
 
 
 if __name__ == "__main__":
