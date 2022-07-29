@@ -21,6 +21,9 @@ class BookAnalyser:
         self.all_books: list[os.DirEntry] = [book for book in os.scandir(get_data_path()) if '.txt' in book.name]
         self.current_book = None
 
+    def select_book(self, book_index: int) -> None:
+        self.current_book = self.__apply_nlp(self.all_books[book_index])
+
     def set_book_example(self) -> None:
         book: os.DirEntry = self.all_books[0]
         self.current_book = self.__apply_nlp(book)
@@ -44,13 +47,26 @@ class BookAnalyser:
         return pd.DataFrame(entity_pot)
 
 
-def __main():
+def get_entities_df() -> pd.DataFrame:
+    return pd.read_csv(Path(get_data_path(), "entities.csv"))
+
+
+def __save_entities_df() -> None:
     book_analyser = BookAnalyser()
     book_analyser.set_book_example()
-    aux = book_analyser.get_book_entities()
-    print(aux)
+    df = book_analyser.get_book_entities()
+    forbidden_characters = ["[", "'", "]"]
+    df["entities"] = df["entities"].apply(lambda x: [item for item in x if item not in forbidden_characters])
+    df.to_csv(Path(get_data_path(), "entities.csv"), index=False)
+
+
+def __main():
+    __save_entities_df()
+    # book_analyser = BookAnalyser()
+    # book_analyser.set_book_example()
+    # aux = book_analyser.get_book_entities()
+    # print(aux)
 
 
 if __name__ == '__main__':
     __main()
-
