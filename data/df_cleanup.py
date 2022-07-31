@@ -9,11 +9,7 @@ def cleanup_df(input_df: pd.DataFrame) -> None:
 
 
 def __main():
-    ccc = CharactersCleanup()
-    ccc.remove_parenthesis()
-    ccc.generate_first_name()
-    aux = ccc.df
-    print(aux)
+    print("done")
 
 
 if __name__ == "__main__":

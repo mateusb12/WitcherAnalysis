@@ -55,17 +55,13 @@ def __save_entities_df() -> None:
     book_analyser = BookAnalyser()
     book_analyser.set_book_example()
     df = book_analyser.get_book_entities()
-    forbidden_characters = ["[", "'", "]"]
-    df["entities"] = df["entities"].apply(lambda x: [item for item in x if item not in forbidden_characters])
+    # forbidden_characters = ["[", "'", "]"]
+    # df["entities"] = df["entities"].apply(lambda x: ''.join([item for item in x if item not in forbidden_characters]))
     df.to_csv(Path(get_data_path(), "entities.csv"), index=False)
 
 
 def __main():
     __save_entities_df()
-    # book_analyser = BookAnalyser()
-    # book_analyser.set_book_example()
-    # aux = book_analyser.get_book_entities()
-    # print(aux)
 
 
 if __name__ == '__main__':
