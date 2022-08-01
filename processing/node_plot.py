@@ -3,6 +3,8 @@ from pyvis.network import Network
 from nlp.relationship_creator import get_network_df
 import community as community_louvain
 
+from processing.centrality_measures import Centrality
+
 
 class NodePlot:
     def __init__(self):
@@ -34,9 +36,20 @@ class NodePlot:
 
     def plot(self):
         self.__pipeline()
-        # net = Network(notebook=True, width="1000px", height="700px", bgcolor="#222222", font_color="white")
-        # net.from_nx(self.G)
+        colorDict = nx.get_node_attributes(self.G, 'degree_centrality')
+        self.net = Network(notebook=True, width="2000px", height="1400px", bgcolor="#222222", font_color="white")
+        self.net.from_nx(self.G)
         # net.show("witcherr.html")
+
+    def get_centrality(self, input_type: Centrality = Centrality.degree) -> dict or None:
+        if input_type == Centrality.degree:
+            return nx.get_node_attributes(self.G, 'degree_centrality')
+        elif input_type == Centrality.betweenness:
+            return nx.get_node_attributes(self.G, 'betweenness_centrality')
+        elif input_type == Centrality.closeness:
+            return nx.get_node_attributes(self.G, 'closeness_centrality')
+        else:
+            return None
 
 
 def __main():
