@@ -1,6 +1,7 @@
 import networkx as nx
 from pyvis.network import Network
 from nlp.relationship_creator import get_network_df
+import community as community_louvain
 
 
 class NodePlot:
@@ -8,7 +9,7 @@ class NodePlot:
         self.network_df = get_network_df()
         self.G = nx.from_pandas_edgelist(self.network_df, source="source", target="target", edge_attr="value",
                                          create_using=nx.Graph())
-        self.net = Network(notebook=True, width="1000px", height="700px", bgcolor="#222222", font_color="white")
+        self.net = None
 
     def __set_node_size(self):
         node_degree = dict(self.G.degree)
@@ -22,7 +23,26 @@ class NodePlot:
         nx.set_node_attributes(self.G, betweenness_dict, 'betweenness_centrality')
         nx.set_node_attributes(self.G, closeness_dict, 'closeness_centrality')
 
-    def plot(self):
-        self.net.from_nx(self.G)
-        self.net.show("witcher.html")
+    def __set_communities(self):
+        communities = community_louvain.best_partition(self.G)
+        nx.set_node_attributes(self.G, communities, 'group')
 
+    def __pipeline(self):
+        self.__set_node_size()
+        self.__set_centrality_measures()
+        self.__set_communities()
+
+    def plot(self):
+        self.__pipeline()
+        # net = Network(notebook=True, width="1000px", height="700px", bgcolor="#222222", font_color="white")
+        # net.from_nx(self.G)
+        # net.show("witcherr.html")
+
+
+def __main():
+    npl = NodePlot()
+    npl.plot()
+
+
+if __name__ == "__main__":
+    __main()
