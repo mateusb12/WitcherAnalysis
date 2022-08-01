@@ -60,9 +60,15 @@ class RelationshipCreator:
         return network_df.groupby(["source", "target"], sort=False, as_index=False).sum()
 
 
+def get_network_df() -> pd.DataFrame:
+    rc = RelationshipCreator()
+    return rc.aggregate_network()
+
+
 def __main():
     rc = RelationshipCreator()
-    rc.__loop_window()
+    relationship_dict = rc.aggregate_network()
+    print("done")
 
 
 if __name__ == "__main__":

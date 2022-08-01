@@ -1,5 +1,8 @@
 dataclasses~=0.6
 spacy~=3.4.1
-wasabi==0.10.1
+wasabi==0.9.1
 selenium~=4.3.0
 pandas~=1.4.3
+numpy~=1.23.1
+networkx~=2.8.5
+scipy~=1.9.0
