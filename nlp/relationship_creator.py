@@ -56,7 +56,7 @@ class RelationshipCreator:
         self.window_size = window_size
         raw_df = self.__loop_window()
         network_df = self.__bidirectional_sort(raw_df)
-        network_df["occurrences"] = 1
+        network_df["value"] = 1
         return network_df.groupby(["source", "target"], sort=False, as_index=False).sum()
 
 
