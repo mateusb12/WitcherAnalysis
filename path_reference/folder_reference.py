@@ -7,6 +7,10 @@ def get_data_path() -> Path:
     return Path(ref, 'data')
 
 
+def get_books_path() -> Path:
+    return Path(get_data_path(), 'books')
+
+
 def get_webscrapping_path() -> Path:
     return Path(ref, 'webscrapping')
 

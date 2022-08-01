@@ -1,8 +1,3 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import dataclasses
 import os
 from pathlib import Path
 
@@ -12,13 +7,13 @@ from spacy import displacy
 from spacy.lang import en as english
 from spacy.tokens import Doc
 
-from path_reference.folder_reference import get_data_path
+from path_reference.folder_reference import get_books_path, get_data_path
 
 
 class BookAnalyser:
     def __init__(self):
         self.NER: english = spacy.load('en_core_web_sm')
-        self.all_books: list[os.DirEntry] = [book for book in os.scandir(get_data_path()) if '.txt' in book.name]
+        self.all_books: list[os.DirEntry] = [book for book in os.scandir(get_books_path()) if '.txt' in book.name]
         self.current_book = None
 
     def select_book(self, book_index: int) -> None:
@@ -55,8 +50,6 @@ def __save_entities_df() -> None:
     book_analyser = BookAnalyser()
     book_analyser.set_book_example()
     df = book_analyser.get_book_entities()
-    # forbidden_characters = ["[", "'", "]"]
-    # df["entities"] = df["entities"].apply(lambda x: ''.join([item for item in x if item not in forbidden_characters]))
     df.to_csv(Path(get_data_path(), "entities.csv"), index=False)
 
 
