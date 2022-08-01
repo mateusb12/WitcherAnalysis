@@ -1,9 +1,15 @@
+import enum
+
 import networkx as nx
 from pyvis.network import Network
 from nlp.relationship_creator import get_network_df
 import community as community_louvain
 
-from processing.centrality_measures import Centrality
+
+class Centrality(enum.Enum):
+    degree = 1
+    betweenness = 2
+    closeness = 3
 
 
 class NodePlot:
