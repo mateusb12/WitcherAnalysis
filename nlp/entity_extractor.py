@@ -62,7 +62,7 @@ class BookAnalyser:
             return pd.read_csv(ref)
         else:
             book_entities = self.__get_book_entities()
-            book_entities.to_csv(Path(get_book_entities_path(), f"{self.__get_file_tag()}"))
+            book_entities.to_csv(Path(get_book_entities_path(), f"{self.__get_file_tag()}"), index=False)
             return book_entities
 
 
@@ -74,8 +74,6 @@ def __save_entities_df() -> None:
     book_analyser = BookAnalyser()
     book_analyser.select_book(1)
     book_analyser.get_book_entity_df()
-    # df = book_analyser.get_book_entities()
-    # df.to_csv(Path(get_entities_path(), "entities.csv"), index=False)
 
 
 def __main():

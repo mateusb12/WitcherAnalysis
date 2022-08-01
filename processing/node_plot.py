@@ -1,6 +1,7 @@
 import enum
 
 import networkx as nx
+import pandas as pd
 from pyvis.network import Network
 from nlp.relationship_creator import get_network_df
 import community as community_louvain
@@ -14,10 +15,14 @@ class Centrality(enum.Enum):
 
 class NodePlot:
     def __init__(self):
-        self.network_df = get_network_df()
+        self.network_df = None
+        self.net = None
+        self.G = None
+
+    def set_network_df(self, input_df: pd.DataFrame):
+        self.network_df = input_df
         self.G = nx.from_pandas_edgelist(self.network_df, source="source", target="target", edge_attr="value",
                                          create_using=nx.Graph())
-        self.net = None
 
     def __set_node_size(self):
         node_degree = dict(self.G.degree)
@@ -35,13 +40,13 @@ class NodePlot:
         communities = community_louvain.best_partition(self.G)
         nx.set_node_attributes(self.G, communities, 'group')
 
-    def __pipeline(self):
+    def pipeline(self):
         self.__set_node_size()
         self.__set_centrality_measures()
         self.__set_communities()
 
     def plot(self):
-        self.__pipeline()
+        self.pipeline()
         self.net = Network(notebook=False, width="2000px", height="1400px", bgcolor="#222222", font_color="white")
         self.net.from_nx(self.G)
         self.net.show("witcher.html")

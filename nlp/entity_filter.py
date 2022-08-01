@@ -13,7 +13,7 @@ def __convert_to_list(input_str: str) -> list[str]:
     return input_str.split(", ")
 
 
-def __filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
+def _filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
     entity_pot = __convert_to_list(entity_list)
     full_names = list(characters_df["character"].tolist())
     first_names = list(characters_df["character_first_name"].tolist())
@@ -26,11 +26,11 @@ class EntityFilter:
         self.characters_df = pd.read_csv(Path(get_data_path(), "characters.csv"))
 
     def set_entity_df(self, input_df: pd.DataFrame) -> None:
-        self.entity_df = input_df
+        self.entity_df = input_df.copy()
 
     def __filter_character_only_entities(self) -> None:
         self.entity_df["character_entities"] = self.entity_df["entities"].apply(
-            lambda x: __filter_entity_df(x, self.characters_df))
+            lambda x: _filter_entity_df(x, self.characters_df))
 
     def __filter_empty_entities(self) -> None:
         self.entity_df = self.entity_df[self.entity_df["character_entities"].map(len) > 0]
