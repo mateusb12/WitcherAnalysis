@@ -40,19 +40,27 @@ class EntityAnalyser:
         self.entity_df["character_entities"] = self.entity_df["character_entities"].apply(
             lambda x: [item.split()[0] for item in x])
 
+    def __delete_entity_column(self) -> None:
+        del self.entity_df["entities"]
+
     def __filter_pipeline(self) -> None:
         self.__filter_character_entities()
         self.__filter_empty_entities()
         self.__filter_double_names()
+        self.__delete_entity_column()
 
     def export_dataframe(self) -> pd.DataFrame:
         self.__filter_pipeline()
         return self.entity_df
 
 
+def get_entity_df() -> pd.DataFrame:
+    ea = EntityAnalyser()
+    return ea.export_dataframe()
+
+
 def __main():
     ea = EntityAnalyser()
-    ea.__filter_pipeline()
     aux = ea.entity_df
     print("done")
 
