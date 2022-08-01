@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from data.df_cleanup import cleanup_df
 from nlp.entity_extractor import get_entities_df
 from path_reference.folder_reference import get_data_path
 
@@ -11,14 +10,13 @@ def __convert_to_list(input_str: str) -> list[str]:
     forbidden_characters = ["[", "'", "]"]
     for c in forbidden_characters:
         input_str = input_str.replace(c, "")
-    return input_str.split(" ")
+    return input_str.split(", ")
 
 
 def filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
-    characters_df["character_first_name"] = characters_df["character"].apply(lambda x: x.split(" ", 1)[0])
     entity_pot = __convert_to_list(entity_list)
-    first_names = [x.lower() for x in characters_df["character_first_name"].tolist()]
     full_names = [x.lower() for x in characters_df["character"].tolist()]
+    first_names = [x.lower() for x in characters_df["character_first_name"].tolist()]
     return [x for x in entity_pot
             if x.lower() in first_names
             or x.lower() in full_names]
@@ -42,15 +40,19 @@ class EntityAnalyser:
         self.entity_df["character_entities"] = self.entity_df["character_entities"].apply(
             lambda x: [item.split()[0] for item in x])
 
-    def filter_pipeline(self) -> None:
+    def __filter_pipeline(self) -> None:
         self.__filter_character_entities()
         self.__filter_empty_entities()
         self.__filter_double_names()
 
+    def export_dataframe(self) -> pd.DataFrame:
+        self.__filter_pipeline()
+        return self.entity_df
+
 
 def __main():
     ea = EntityAnalyser()
-    ea.filter_pipeline()
+    ea.__filter_pipeline()
     aux = ea.entity_df
     print("done")
 
