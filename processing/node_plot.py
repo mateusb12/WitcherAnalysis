@@ -42,10 +42,9 @@ class NodePlot:
 
     def plot(self):
         self.__pipeline()
-        colorDict = nx.get_node_attributes(self.G, 'degree_centrality')
-        self.net = Network(notebook=True, width="2000px", height="1400px", bgcolor="#222222", font_color="white")
+        self.net = Network(notebook=False, width="2000px", height="1400px", bgcolor="#222222", font_color="white")
         self.net.from_nx(self.G)
-        # net.show("witcherr.html")
+        self.net.show("witcher.html")
 
     def get_centrality(self, input_type: Centrality = Centrality.degree) -> dict or None:
         if input_type == Centrality.degree:
