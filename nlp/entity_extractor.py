@@ -10,11 +10,16 @@ from spacy.tokens import Doc
 from path_reference.folder_reference import get_books_path, get_data_path, get_book_entities_path
 
 
+def get_all_books() -> list[os.DirEntry]:
+    aux = [book for book in os.scandir(get_books_path()) if '.txt' in book.name]
+    aux.insert(0, None)
+    return aux
+
+
 class BookAnalyser:
     def __init__(self):
         self.NER: english = spacy.load('en_core_web_sm')
-        self.all_books: list[os.DirEntry] = [book for book in os.scandir(get_books_path()) if '.txt' in book.name]
-        self.all_books.insert(0, None)
+        self.all_books: list[os.DirEntry] = get_all_books()
         self.current_file = None
         self.current_book = None
 
@@ -50,12 +55,15 @@ class BookAnalyser:
     def __existing_file(self) -> bool:
         return Path(get_book_entities_path(), f"{self.__get_file_tag()}").exists()
 
-    def save_book_entities(self) -> None:
+    def get_book_entity_df(self) -> pd.DataFrame:
         if existing_file := self.__existing_file():
             print(f"File [{self.__get_file_tag()}] already exists")
+            ref = Path(get_book_entities_path(), f"{self.__get_file_tag()}")
+            return pd.read_csv(ref)
         else:
             book_entities = self.__get_book_entities()
             book_entities.to_csv(Path(get_book_entities_path(), f"{self.__get_file_tag()}"))
+            return book_entities
 
 
 def get_entities_df() -> pd.DataFrame:
@@ -65,7 +73,7 @@ def get_entities_df() -> pd.DataFrame:
 def __save_entities_df() -> None:
     book_analyser = BookAnalyser()
     book_analyser.select_book(1)
-    book_analyser.save_book_entities()
+    book_analyser.get_book_entity_df()
     # df = book_analyser.get_book_entities()
     # df.to_csv(Path(get_entities_path(), "entities.csv"), index=False)
 

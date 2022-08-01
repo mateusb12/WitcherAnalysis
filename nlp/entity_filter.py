@@ -13,21 +13,24 @@ def __convert_to_list(input_str: str) -> list[str]:
     return input_str.split(", ")
 
 
-def filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
+def __filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
     entity_pot = __convert_to_list(entity_list)
     full_names = list(characters_df["character"].tolist())
     first_names = list(characters_df["character_first_name"].tolist())
     return [x for x in entity_pot if x in first_names or x in full_names]
 
 
-class EntityAnalyser:
+class EntityFilter:
     def __init__(self):
-        self.entity_df = get_entities_df()
+        self.entity_df = None
         self.characters_df = pd.read_csv(Path(get_data_path(), "characters.csv"))
+
+    def set_entity_df(self, input_df: pd.DataFrame) -> None:
+        self.entity_df = input_df
 
     def __filter_character_only_entities(self) -> None:
         self.entity_df["character_entities"] = self.entity_df["entities"].apply(
-            lambda x: filter_entity_df(x, self.characters_df))
+            lambda x: __filter_entity_df(x, self.characters_df))
 
     def __filter_empty_entities(self) -> None:
         self.entity_df = self.entity_df[self.entity_df["character_entities"].map(len) > 0]
@@ -46,18 +49,18 @@ class EntityAnalyser:
         self.__filter_double_names()
         self.__delete_entity_column()
 
-    def export_dataframe(self) -> pd.DataFrame:
+    def export_filtered_dataframe(self) -> pd.DataFrame:
         self.__filter_pipeline()
         return self.entity_df
 
 
 def get_entity_df() -> pd.DataFrame:
-    ea = EntityAnalyser()
-    return ea.export_dataframe()
+    ea = EntityFilter()
+    return ea.export_filtered_dataframe()
 
 
 def __main():
-    ea = EntityAnalyser()
+    ea = EntityFilter()
     aux = ea.entity_df
     print("done")
 

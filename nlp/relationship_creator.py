@@ -1,13 +1,16 @@
 import numpy as np
 import pandas as pd
 
-from nlp.entity_analyser import get_entity_df
+from nlp.entity_filter import get_entity_df
 
 
 class RelationshipCreator:
     def __init__(self):
-        self.entity_df = get_entity_df()
+        self.entity_df = None
         self.window_size: int = 5
+
+    def set_entity_df(self, input_df: pd.DataFrame) -> None:
+        self.entity_df = input_df
 
     @staticmethod
     def __remove_duplicates(input_list: list[str]) -> list[str]:
