@@ -1,9 +1,7 @@
-import pandas as pd
-
 from nlp.entity_extractor import BookAnalyser
 from nlp.entity_filter import EntityFilter
 from nlp.relationship_creator import RelationshipCreator
-from processing.node_plot import NodePlot
+from witcher_network.node_plot import NodePlot
 
 
 class Wrapper:
@@ -18,7 +16,7 @@ class Wrapper:
         self.book_analyser.select_book(book_number)
         self.book_number = book_number
 
-    def book_pipeline(self) -> dict:
+    def book_pipeline(self) -> None:
         entity_df = self.book_analyser.get_book_entity_df()
         self.entity_filter.set_entity_df(entity_df)
         df = self.entity_filter.export_filtered_dataframe()
@@ -26,13 +24,19 @@ class Wrapper:
         relationship_df = self.relationship_creator.aggregate_network()
         self.node_plot.set_network_df(relationship_df)
         self.node_plot.pipeline()
+
+    def get_centrality(self) -> dict:
         return self.node_plot.get_centrality()
+
+    def plot(self) -> None:
+        self.node_plot.plot()
 
 
 def __main():
     w = Wrapper()
     w.set_book(3)
-    q = w.book_pipeline()
+    w.book_pipeline()
+    w.plot()
     print("wow")
 
 
