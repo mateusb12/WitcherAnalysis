@@ -3,7 +3,7 @@ import enum
 import networkx as nx
 import pandas as pd
 from pyvis.network import Network
-from nlp.relationship_creator import get_network_df
+from book_processing.relationship_creator import get_network_df
 import community as community_louvain
 
 

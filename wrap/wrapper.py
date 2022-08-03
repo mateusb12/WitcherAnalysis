@@ -1,6 +1,6 @@
-from nlp.entity_extractor import BookAnalyser
-from nlp.entity_filter import EntityFilter
-from nlp.relationship_creator import RelationshipCreator
+from book_processing.entity_extractor import BookAnalyser
+from book_processing.entity_filter import EntityFilter
+from book_processing.relationship_creator import RelationshipCreator
 from witcher_network.node_plot import NodePlot
 
 

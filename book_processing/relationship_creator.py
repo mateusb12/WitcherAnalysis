@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from nlp.entity_filter import get_entity_df
+from book_processing.entity_filter import get_entity_df
 
 
 class RelationshipCreator:
