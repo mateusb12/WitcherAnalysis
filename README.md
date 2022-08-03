@@ -7,7 +7,9 @@ attached to its own entity list
 
 ![sample image](https://i.imgur.com/iKg2nyM.png)
 
-- A characters.csv file is scrapped from a the witcher fandom wiki, in order to list all available characters in each book
+- A characters.csv file is scrapped from a the witcher fandom wiki, in order to list all available characters in 
+each book
+
 ![sample image](https://i.imgur.com/yM99aVF.png)
 - Entities from the NER analysis are compared with the characters.csv file, in order to create a "character-only
 entities" filtered dataframe
