@@ -55,7 +55,7 @@ class WitcherScrapper:
     def export_dataframe(self) -> None:
         df = pd.DataFrame(self.__get_book_table())
         df["character_first_name"] = df["character"].apply(lambda x: x.split(" ", 1)[0])
-        df.to_csv(Path(get_data_path(), "characters.csv"), index=False)
+        df.to_csv(Path(get_data_path(), "witcher_characters.csv"), index=False)
         self.driver.close()
 
 

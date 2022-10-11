@@ -72,12 +72,17 @@ class BookAnalyser:
         else:
             book_entities = self.__get_book_entities()
             output_location = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
-            output_folder = output_location.parent
-            if not output_folder.exists():
-                output_folder.mkdir(parents=True)
-                Path(output_folder, "__init__.py").touch()
+            self.handle_new_folder(output_location)
             book_entities.to_csv(output_location, index=False)
             return book_entities
+
+    @staticmethod
+    def handle_new_folder(output_location):
+        """ Creates a new folder if it doesn't exist """
+        output_folder = output_location.parent
+        if not output_folder.exists():
+            output_folder.mkdir(parents=True)
+            Path(output_folder, "__init__.py").touch()
 
 
 def __save_entities_df():

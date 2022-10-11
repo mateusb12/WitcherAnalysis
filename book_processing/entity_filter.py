@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from path_reference.folder_reference import get_data_path, get_books_entities_path
+from path_reference.folder_reference import get_data_path, get_books_entities_path, get_book_characters_path, \
+    get_books_path
 
 
 def __cast_to_str(list_obj: list) -> str:
@@ -26,9 +27,10 @@ def _filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
 
 
 class EntityFilter:
-    def __init__(self):
+    def __init__(self, series: str = "witcher"):
         self.entity_df = None
-        self.characters_df = pd.read_csv(Path(get_data_path(), "characters.csv"))
+        character_path = Path(get_data_path(), "books_characters", f"{series}_characters.csv")
+        self.characters_df = pd.read_csv(character_path)
 
     def set_entity_df(self, input_df: pd.DataFrame) -> None:
         self.entity_df = input_df.copy()
@@ -59,15 +61,32 @@ class EntityFilter:
         return self.entity_df
 
 
+def __get_witcher_book_example() -> Path:
+    return Path(get_books_path(), "witcher_books", "1 The Last Wish.txt")
+
+
+def __get_harry_potter_book_example() -> Path:
+    return Path(get_books_path(), "harry_potter_books", "1 The Philosopher's Stone.txt")
+
+
+def __get_witcher_entity_example() -> Path:
+    return Path(get_books_entities_path(), "witcher_entities", "1 The Last Wish.csv")
+
+
+def __get_harry_potter_entity_example() -> Path:
+    return Path(get_books_entities_path(), "harry_potter_books_entities", "1 The Philosopher's Stone.csv")
+
+
 def get_filtered_entity_df() -> pd.DataFrame:
     ea = EntityFilter()
-    entity_df = pd.read_csv(Path(get_books_entities_path(), "1 The Last Wish.csv"))
+    book_path = __get_harry_potter_entity_example()
+    entity_df = pd.read_csv(book_path, encoding="utf-8")
     ea.set_entity_df(entity_df)
     return ea.export_filtered_dataframe()
 
 
 def __main():
-    aux = get_entity_df()
+    aux = get_filtered_entity_df()
     return 0
 
 
