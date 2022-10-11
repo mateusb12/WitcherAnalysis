@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from book_processing.entity_extractor import get_entities_df
 from path_reference.folder_reference import get_data_path, get_books_entities_path
 
 

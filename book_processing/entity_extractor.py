@@ -24,6 +24,7 @@ def get_entities_location(input_series: str) -> Path:
 
 class BookAnalyser:
     def __init__(self, series: str = "witcher"):
+        self.series_tag = series
         self.NER: english = spacy.load('en_core_web_sm')
         self.all_books: list[os.DirEntry] = get_all_books(series)
         self.current_file = None
@@ -60,21 +61,17 @@ class BookAnalyser:
         return f"{self.current_file.name.split('.')[0]}.csv"
 
     def __existing_file(self) -> bool:
-        return Path(get_book_entities_path(), f"{self.__get_file_tag()}").exists()
+        return Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}").exists()
 
     def get_book_entity_df(self) -> pd.DataFrame:
         if existing_file := self.__existing_file():
             print(f"File [{self.__get_file_tag()}] already exists")
-            ref = Path(get_book_entities_path(), f"{self.__get_file_tag()}")
+            ref = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
             return pd.read_csv(ref)
         else:
             book_entities = self.__get_book_entities()
-            book_entities.to_csv(Path(get_book_entities_path(), f"{self.__get_file_tag()}"), index=False)
+            book_entities.to_csv(Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}"), index=False)
             return book_entities
-
-
-def get_entities_df() -> pd.DataFrame:
-    return pd.read_csv(Path(get_book_entities_path(), "entities.csv"))
 
 
 def __save_entities_df():
