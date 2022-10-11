@@ -10,16 +10,22 @@ from spacy.tokens import Doc
 from path_reference.folder_reference import get_books_path, get_data_path, get_book_entities_path
 
 
-def get_all_books() -> list[os.DirEntry]:
-    aux = [book for book in os.scandir(get_books_path()) if '.txt' in book.name]
+def get_all_books(input_series: str) -> list[os.DirEntry]:
+    book_path = get_books_path()
+    series_book_path = Path(book_path, f"{input_series}_books")
+    aux = [book for book in os.scandir(series_book_path) if '.txt' in book.name]
     aux.insert(0, None)
     return aux
 
 
+def get_entities_location(input_series: str) -> Path:
+    return Path(get_book_entities_path(), f"{input_series}_books_entities")
+
+
 class BookAnalyser:
-    def __init__(self):
+    def __init__(self, series: str = "witcher"):
         self.NER: english = spacy.load('en_core_web_sm')
-        self.all_books: list[os.DirEntry] = get_all_books()
+        self.all_books: list[os.DirEntry] = get_all_books(series)
         self.current_file = None
         self.current_book = None
 
