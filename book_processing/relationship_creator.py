@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from book_processing.entity_filter import get_entity_df
+from book_processing.entity_extractor import BookAnalyser
+from book_processing.entity_filter import EntityFilter, get_filtered_entity_df
 
 
 class RelationshipCreator:
@@ -70,8 +71,10 @@ def get_network_df() -> pd.DataFrame:
 
 def __main():
     rc = RelationshipCreator()
+    entity_df = get_filtered_entity_df()
+    rc.set_entity_df(entity_df)
     relationship_dict = rc.aggregate_network()
-    print("done")
+    return 0
 
 
 if __name__ == "__main__":

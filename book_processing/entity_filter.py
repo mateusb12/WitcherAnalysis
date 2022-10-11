@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from book_processing.entity_extractor import get_entities_df
-from path_reference.folder_reference import get_data_path
+from path_reference.folder_reference import get_data_path, get_books_entities_path
 
 
 def __cast_to_str(list_obj: list) -> str:
@@ -60,15 +60,16 @@ class EntityFilter:
         return self.entity_df
 
 
-def get_entity_df() -> pd.DataFrame:
+def get_filtered_entity_df() -> pd.DataFrame:
     ea = EntityFilter()
+    entity_df = pd.read_csv(Path(get_books_entities_path(), "1 The Last Wish.csv"))
+    ea.set_entity_df(entity_df)
     return ea.export_filtered_dataframe()
 
 
 def __main():
-    ea = EntityFilter()
-    aux = ea.entity_df
-    print("done")
+    aux = get_entity_df()
+    return 0
 
 
 if __name__ == "__main__":

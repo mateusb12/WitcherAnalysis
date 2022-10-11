@@ -8,6 +8,10 @@ def get_data_path() -> Path:
     return Path(ref, 'data')
 
 
+def get_books_entities_path() -> Path:
+    return Path(get_data_path(), 'books_entities')
+
+
 def get_books_path() -> Path:
     return Path(get_data_path(), 'books')
 

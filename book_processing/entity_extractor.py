@@ -26,6 +26,7 @@ class BookAnalyser:
     def select_book(self, book_index: int) -> None:
         self.current_file = self.all_books[book_index]
         self.current_book = self.__apply_nlp(self.all_books[book_index])
+        print(f"Selected book → {self.current_file.name}")
 
     def set_book_example(self) -> None:
         book: os.DirEntry = self.all_books[1]
@@ -70,10 +71,11 @@ def get_entities_df() -> pd.DataFrame:
     return pd.read_csv(Path(get_book_entities_path(), "entities.csv"))
 
 
-def __save_entities_df() -> None:
+def __save_entities_df():
     book_analyser = BookAnalyser()
     book_analyser.select_book(1)
-    book_analyser.get_book_entity_df()
+    aux = book_analyser.get_book_entity_df()
+    return 0
 
 
 def __main():
