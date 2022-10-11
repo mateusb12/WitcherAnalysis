@@ -40,7 +40,7 @@ class BookAnalyser:
         self.current_book = self.__apply_nlp(book)
 
     def __apply_nlp(self, input_book: os.DirEntry) -> Doc:
-        book_text = open(input_book).read()
+        book_text = open(input_book, encoding="utf8").read()
         return self.NER(book_text)
 
     def print_book(self) -> str:
@@ -50,9 +50,10 @@ class BookAnalyser:
 
     def __get_book_entities(self) -> pd.DataFrame:
         entity_pot = []
+        size = len(list(self.current_book.sents))
 
         for index, sentence in enumerate(self.current_book.sents):
-            print(index)
+            print(f"Processing sentence {index} of {size}")
             if entity_list := [entity.text for entity in sentence.ents]:
                 entity_pot.append({"sentence": sentence, "entities": entity_list})
         return pd.DataFrame(entity_pot)
@@ -70,12 +71,17 @@ class BookAnalyser:
             return pd.read_csv(ref)
         else:
             book_entities = self.__get_book_entities()
-            book_entities.to_csv(Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}"), index=False)
+            output_location = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
+            output_folder = output_location.parent
+            if not output_folder.exists():
+                output_folder.mkdir(parents=True)
+                Path(output_folder, "__init__.py").touch()
+            book_entities.to_csv(output_location, index=False)
             return book_entities
 
 
 def __save_entities_df():
-    book_analyser = BookAnalyser()
+    book_analyser = BookAnalyser(series="harry_potter")
     book_analyser.select_book(1)
     aux = book_analyser.get_book_entity_df()
     return 0
