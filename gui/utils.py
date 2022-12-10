@@ -17,7 +17,8 @@ def get_book_names(folder_name: str):
     folder_path = [f for f in raw_books_names if str(f).split("\\")[-1] == real_folder_name]
     folder_content = [f for f in folder_path[0].iterdir() if f.is_file()]
     book_names = [str(f).split("\\")[-1] for f in folder_content]
-    return [book_name.replace(".txt", "") for book_name in book_names]
+    adjusted_book_names = [book_name for book_name in book_names if ".txt" in book_name]
+    return [book_name.replace(".txt", "") for book_name in adjusted_book_names]
 
 
 def __main():
