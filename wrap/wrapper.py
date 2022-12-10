@@ -11,10 +11,12 @@ class Wrapper:
         self.relationship_creator = RelationshipCreator()
         self.node_plot = NodePlot()
         self.book_number: int = 0
+        self.book_name = ""
 
     def set_book(self, book_number: int):
         self.book_analyser.select_book(book_number)
         self.book_number = book_number
+        self.book_name = self.book_analyser.book_dict[self.book_number]
 
     def book_pipeline(self) -> None:
         entity_df = self.book_analyser.get_book_entity_df()
@@ -29,12 +31,12 @@ class Wrapper:
         return self.node_plot.get_centrality()
 
     def plot(self) -> None:
-        self.node_plot.plot()
+        self.node_plot.plot(self.book_name)
 
 
 def __main():
     w = Wrapper()
-    w.set_book(3)
+    w.set_book(2)
     w.book_pipeline()
     w.plot()
     print("wow")

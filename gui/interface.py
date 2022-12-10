@@ -1,12 +1,15 @@
+import re
 import tkinter as tk
 from tkinter import ttk
 from typing import List
 
 from gui.utils import get_book_folders, get_book_names
+from wrap.wrapper import Wrapper
 
 
 class BookSelector:
     def __init__(self, window_size: tuple[int, int] = (500, 500)):
+        self.wrapper = Wrapper()
         self.root = tk.Tk()
         self.window_width = window_size[0]
         self.window_height = window_size[1]
@@ -68,10 +71,16 @@ class BookSelector:
         self.query_button["highlightbackground"] = "black"
 
     def execute_query_button(self):
-        print(self.second_dropdown_selected_option.get())
+        chosen_option = self.second_dropdown_selected_option.get()
+        book_match = re.match(r"\d+", chosen_option)
+        if not book_match:
+            raise ValueError("Invalid book option")
+        book_number = int(book_match.group())
+        self.wrapper.set_book(book_number)
+        self.wrapper.book_pipeline()
+        self.wrapper.plot()
 
     def execute_first_dropdown(self, value):
-        print(value)
         self.first_dropdown_selected_option.set(value)
         self.update_second_dropdown_options()
 

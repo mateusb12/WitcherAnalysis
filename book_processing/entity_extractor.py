@@ -29,6 +29,10 @@ class BookAnalyser:
         self.all_books: list[os.DirEntry] = get_all_books(series)
         self.current_file = None
         self.current_book = None
+        self.book_dict = self.get_book_dict()
+
+    def get_book_dict(self) -> dict:
+        return {index: book.name.split('.')[0] for index, book in enumerate(self.all_books) if index != 0}
 
     def select_book(self, book_index: int) -> None:
         self.current_file = self.all_books[book_index]

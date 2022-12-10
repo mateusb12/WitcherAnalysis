@@ -45,11 +45,11 @@ class NodePlot:
         self.__set_centrality_measures()
         self.__set_communities()
 
-    def plot(self):
+    def plot(self, book_name: str):
         self.pipeline()
         self.net = Network(notebook=False, width="2000px", height="1400px", bgcolor="#222222", font_color="white")
         self.net.from_nx(self.G)
-        self.net.show("witcher.html")
+        self.net.show(f"book_graphs\\{book_name}.html")
 
     def get_centrality(self, input_type: Centrality = Centrality.degree) -> dict or None:
         if input_type == Centrality.degree:
