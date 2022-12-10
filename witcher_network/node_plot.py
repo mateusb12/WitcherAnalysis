@@ -1,10 +1,13 @@
 import enum
+from pathlib import Path
 
 import networkx as nx
 import pandas as pd
 from pyvis.network import Network
 from book_processing.relationship_creator import get_network_df
 import community as community_louvain
+
+from path_reference.folder_reference import get_book_graphs_path
 
 
 class Centrality(enum.Enum):
@@ -45,11 +48,12 @@ class NodePlot:
         self.__set_centrality_measures()
         self.__set_communities()
 
-    def plot(self, book_name: str):
+    def plot(self, book_name: str = "2 The Sword of Destiny"):
         self.pipeline()
         self.net = Network(notebook=False, width="2000px", height="1400px", bgcolor="#222222", font_color="white")
         self.net.from_nx(self.G)
-        self.net.show(f"book_graphs\\{book_name}.html")
+        book_path = Path(get_book_graphs_path(), f"{book_name}.html")
+        self.net.show(str(book_path))
 
     def get_centrality(self, input_type: Centrality = Centrality.degree) -> dict or None:
         if input_type == Centrality.degree:

@@ -4,6 +4,7 @@ from tkinter import ttk
 from typing import List
 
 from gui.utils import get_book_folders, get_book_names
+from wrap.existing_graphs import retrieve_book
 from wrap.wrapper import Wrapper
 
 
@@ -76,9 +77,11 @@ class BookSelector:
         if not book_match:
             raise ValueError("Invalid book option")
         book_number = int(book_match.group())
-        self.wrapper.set_book(book_number)
-        self.wrapper.book_pipeline()
-        self.wrapper.plot()
+        existing_book = retrieve_book(chosen_option)
+        if not existing_book:
+            self.wrapper.set_book(book_number)
+            self.wrapper.book_pipeline()
+            self.wrapper.plot()
 
     def execute_first_dropdown(self, value):
         self.first_dropdown_selected_option.set(value)
