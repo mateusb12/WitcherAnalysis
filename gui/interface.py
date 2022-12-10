@@ -72,12 +72,15 @@ class BookSelector:
         self.query_button["highlightbackground"] = "black"
 
     def execute_query_button(self):
-        chosen_option = self.second_dropdown_selected_option.get()
-        book_match = re.match(r"\d+", chosen_option)
+        raw_series = self.first_dropdown_selected_option.get()
+        chosen_series = raw_series.lower().replace(" books", "").replace(" ", "_" if " " in raw_series else "")
+        self.wrapper.book_analyser.set_new_series(chosen_series)
+        chosen_book = self.second_dropdown_selected_option.get()
+        book_match = re.match(r"\d+", chosen_book)
         if not book_match:
             raise ValueError("Invalid book option")
         book_number = int(book_match.group())
-        existing_book = retrieve_book(chosen_option)
+        existing_book = retrieve_book(chosen_book)
         if not existing_book:
             self.wrapper.set_book(book_number)
             self.wrapper.book_pipeline()

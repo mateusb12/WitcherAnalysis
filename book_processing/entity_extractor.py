@@ -31,6 +31,11 @@ class BookAnalyser:
         self.current_book = None
         self.book_dict = self.get_book_dict()
 
+    def set_new_series(self, input_series: str):
+        self.series_tag = input_series
+        self.all_books = get_all_books(input_series)
+        self.book_dict = self.get_book_dict()
+
     def get_book_dict(self) -> dict:
         return {index: book.name.split('.')[0] for index, book in enumerate(self.all_books) if index != 0}
 

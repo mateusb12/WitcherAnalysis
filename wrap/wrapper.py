@@ -7,6 +7,7 @@ from witcher_network.node_plot import NodePlot
 class Wrapper:
     def __init__(self):
         self.book_analyser = BookAnalyser()
+        self.book_analyser.set_new_series("harry_potter")
         self.entity_filter = EntityFilter()
         self.relationship_creator = RelationshipCreator()
         self.node_plot = NodePlot()
