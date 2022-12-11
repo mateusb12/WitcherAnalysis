@@ -30,7 +30,10 @@ class EntityFilter:
     def __init__(self, series: str = "witcher"):
         self.entity_df = None
         character_path = Path(get_data_path(), "books_characters", f"{series}_characters.csv")
-        self.characters_df = pd.read_csv(character_path)
+        if existing_file := Path(character_path).is_file():
+            self.characters_df = pd.read_csv(character_path)
+        else:
+            raise FileNotFoundError(f"File {character_path} does not exist")
 
     def set_entity_df(self, input_df: pd.DataFrame) -> None:
         self.entity_df = input_df.copy()
