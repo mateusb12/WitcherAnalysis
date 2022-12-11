@@ -70,7 +70,7 @@ def __get_harry_potter_book_example() -> Path:
 
 
 def __get_witcher_entity_example() -> Path:
-    return Path(get_books_entities_path(), "witcher_entities", "1 The Last Wish.csv")
+    return Path(get_books_entities_path(), "witcher_books_entities", "1 The Last Wish.csv")
 
 
 def __get_harry_potter_entity_example() -> Path:
@@ -79,7 +79,7 @@ def __get_harry_potter_entity_example() -> Path:
 
 def get_filtered_entity_df() -> pd.DataFrame:
     ea = EntityFilter()
-    book_path = __get_harry_potter_entity_example()
+    book_path = __get_witcher_entity_example()
     entity_df = pd.read_csv(book_path, encoding="utf-8")
     ea.set_entity_df(entity_df)
     return ea.export_filtered_dataframe()
