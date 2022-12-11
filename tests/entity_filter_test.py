@@ -60,17 +60,17 @@ if __name__ == "__main__":
     __main()
 
 
-# def test_witcher_main_characters():
-#     """This function tests if some main characters are present in the entitites"""
-#     unique_entities = get_last_witcher_unique_characters()
-#     expected = ["Geralt", "Triss"]
-#     for character in expected:
-#         assert character in unique_entities
-#
-#
-# def test_harry_potter_main_characters():
-#     """This function tests if some main characters are present in the entitites"""
-#     unique_entities = get_harry_potter_unique_characters()
-#     expected = ["Harry", "Hermione", "Ron"]
-#     for character in expected:
-#         assert character in unique_entities
+def test_witcher_main_characters():
+    """This function tests if some main characters are present in the entitites"""
+    unique_entities = get_last_witcher_unique_characters()
+    expected = ["Geralt", "Triss"]
+    for character in expected:
+        assert character in unique_entities
+
+
+def test_harry_potter_main_characters():
+    """This function tests if some main characters are present in the entitites"""
+    unique_entities = get_harry_potter_unique_characters()
+    expected = ["Harry", "Hermione", "Ron"]
+    for character in expected:
+        assert character in unique_entities

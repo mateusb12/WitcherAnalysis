@@ -22,6 +22,7 @@ class HarryPotterScrapper:
         self.__get_character_pages_links()
         self.__scrap_characters()
         self.__convert_to_table()
+        self.driver.close()
 
     def __load_website(self) -> None:
         self.driver.get(self.page_url)
@@ -55,7 +56,9 @@ class HarryPotterScrapper:
 
     def __convert_to_table(self):
         df = pd.DataFrame(self.characters)
-        df.to_csv(Path(get_data_path(), "books_characters", "harry_potter_characters.csv"), index=False, encoding="utf-8")
+        df["character_first_name"] = df["character"].apply(lambda x: x.split(" ", 1)[0])
+        df.to_csv(Path(get_data_path(), "books_characters", "harry_potter_characters.csv"),
+                  index=False, encoding="utf-8")
 
 
 def __main():
