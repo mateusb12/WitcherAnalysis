@@ -41,7 +41,7 @@ class BookAnalyser:
 
     def select_book(self, book_index: int) -> None:
         self.current_file = self.all_books[book_index]
-        self.current_book = self.__apply_nlp(self.all_books[book_index])
+        self.current_book = self.__apply_nlp(self.current_file)
         print(f"Selected book → {self.current_file.name}")
 
     def set_book_example(self) -> None:
@@ -49,13 +49,15 @@ class BookAnalyser:
         self.current_book = self.__apply_nlp(book)
 
     def __apply_nlp(self, input_book: os.DirEntry) -> Doc:
-        book_text = open(input_book, encoding="utf8").read()
-        return self.NER(book_text)
+        input_book_location = input_book.path
+        with open(input_book_location, encoding="utf8") as f:
+            book_text = f.read()
+            return self.NER(book_text)
 
     def print_book(self) -> str:
         book = self.current_book
-        example = self.__apply_nlp(book)
-        return spacy.displacy.render(example[:100], style="ent", jupyter=True, minify=True)
+        # example = self.__apply_nlp(book)
+        return spacy.displacy.render(book[:100], style="ent", jupyter=True, minify=True)
 
     def __get_book_entities(self) -> pd.DataFrame:
         entity_pot = []
@@ -97,6 +99,7 @@ class BookAnalyser:
 def __save_entities_df():
     book_analyser = BookAnalyser(series="harry_potter")
     book_analyser.select_book(1)
+    aux2 = book_analyser.print_book()
     aux = book_analyser.get_book_entity_df()
     return 0
 
