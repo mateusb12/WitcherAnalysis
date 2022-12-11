@@ -82,9 +82,10 @@ class BookSelector:
         book_number = int(book_match.group())
         existing_book = retrieve_book(chosen_book)
         if not existing_book:
-            self.wrapper.set_book(book_number)
-            self.wrapper.book_pipeline()
-            self.wrapper.plot()
+            new_wrapper = Wrapper(series=chosen_series)
+            new_wrapper.set_book(book_number)
+            new_wrapper.book_pipeline()
+            new_wrapper.plot()
 
     def execute_first_dropdown(self, value):
         self.first_dropdown_selected_option.set(value)
