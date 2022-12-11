@@ -80,16 +80,24 @@ def __get_harry_potter_entity_example() -> Path:
     return Path(get_books_entities_path(), "harry_potter_books_entities", "1 The Philosopher's Stone.csv")
 
 
-def get_filtered_entity_df() -> pd.DataFrame:
-    ea = EntityFilter()
+def get_witcher_filtered_df() -> pd.DataFrame:
+    ea = EntityFilter(series="witcher")
     book_path = __get_witcher_entity_example()
     entity_df = pd.read_csv(book_path, encoding="utf-8")
     ea.set_entity_df(entity_df)
     return ea.export_filtered_dataframe()
 
 
+def get_harry_potter_filtered_df() -> pd.DataFrame:
+    ea = EntityFilter(series="harry_potter")
+    book_path = __get_harry_potter_entity_example()
+    entity_df = pd.read_csv(book_path, encoding="utf-8")
+    ea.set_entity_df(entity_df)
+    return ea.export_filtered_dataframe()
+
+
 def __main():
-    aux = get_filtered_entity_df()
+    aux = get_harry_potter_filtered_df()
     return 0
 
 

@@ -5,10 +5,10 @@ from witcher_network.node_plot import NodePlot
 
 
 class Wrapper:
-    def __init__(self):
+    def __init__(self, series: str = "witcher"):
         self.book_analyser = BookAnalyser()
-        self.book_analyser.set_new_series("harry_potter")
-        self.entity_filter = EntityFilter()
+        self.book_analyser.set_new_series(series)
+        self.entity_filter = EntityFilter(series=series)
         self.relationship_creator = RelationshipCreator()
         self.node_plot = NodePlot()
         self.book_number: int = 0
@@ -22,8 +22,8 @@ class Wrapper:
     def book_pipeline(self) -> None:
         entity_df = self.book_analyser.get_book_entity_df()
         self.entity_filter.set_entity_df(entity_df)
-        df = self.entity_filter.export_filtered_dataframe()
-        self.relationship_creator.set_entity_df(df)
+        filtered_df = self.entity_filter.export_filtered_dataframe()
+        self.relationship_creator.set_entity_df(filtered_df)
         relationship_df = self.relationship_creator.aggregate_network()
         self.node_plot.set_network_df(relationship_df)
         self.node_plot.pipeline()
@@ -36,7 +36,7 @@ class Wrapper:
 
 
 def __main():
-    w = Wrapper()
+    w = Wrapper("harry_potter")
     w.set_book(2)
     w.book_pipeline()
     w.plot()
