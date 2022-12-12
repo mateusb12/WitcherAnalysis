@@ -20,10 +20,13 @@ class Wrapper:
         self.book_name = self.book_analyser.book_dict[self.book_number]
 
     def book_pipeline(self) -> None:
+        print("Entity dataframe analysis")
         entity_df = self.book_analyser.get_book_entity_df()
         self.entity_filter.set_entity_df(entity_df)
+        print("Creating filtered dataframe")
         filtered_df = self.entity_filter.export_filtered_dataframe()
         self.relationship_creator.set_entity_df(filtered_df)
+        print("Creating network dataframe")
         relationship_df = self.relationship_creator.aggregate_network()
         self.node_plot.set_network_df(relationship_df)
         self.node_plot.pipeline()

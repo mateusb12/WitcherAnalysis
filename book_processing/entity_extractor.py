@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -62,9 +63,19 @@ class BookAnalyser:
     def __get_book_entities(self) -> pd.DataFrame:
         entity_pot = []
         size = len(list(self.current_book.sents))
+        time_start = time.time()
 
         for index, sentence in enumerate(self.current_book.sents):
-            print(f"Processing sentence {index} of {size}")
+            percentage = round((index / size) * 100, 2)
+            time_elapsed_seconds = round(time.time() - time_start, 2)
+            speed = index / time_elapsed_seconds if time_elapsed_seconds != 0 else 1
+            remaining_sentences = size - index
+            remaining_seconds = round(remaining_sentences / speed, 2)
+            eta = time_start + remaining_seconds
+            eta_str = time.strftime("%H:%M:%S", time.localtime(eta))
+            if index % 10 == 0:
+                print(f"Processing sentence {index} of {size} ({percentage}%), speed: {round(speed, 2)} sentences/s,"
+                      f"ETA {eta_str}")
             if entity_list := [entity.text for entity in sentence.ents]:
                 entity_pot.append({"sentence": sentence, "entities": entity_list})
         return pd.DataFrame(entity_pot)
@@ -81,6 +92,7 @@ class BookAnalyser:
             ref = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
             return pd.read_csv(ref)
         else:
+            print("Book entity not found. Processing a new one...")
             book_entities = self.__get_book_entities()
             output_location = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
             self.handle_new_folder(output_location)
