@@ -53,7 +53,19 @@ class BookAnalyser:
         input_book_location = input_book.path
         with open(input_book_location, encoding="utf8") as f:
             book_text = f.read()
-            return self.NER(book_text)
+            text_size = len(book_text)
+            if text_size <= 1000000:
+                return self.NER(book_text)
+            print("Big file detected. Splitting...")
+            return self.__handle_big_file(book_text)
+
+    def __handle_big_file(self, file_content: str):
+        text_chunks = [file_content[i:i + 1000000] for i in range(0, len(file_content), 1000000)]
+        nlp_pot = [self.NER(chunk) for chunk in text_chunks]
+        single_doc = nlp_pot[0]
+        for doc in nlp_pot[1:]:
+            single_doc = single_doc.merge(doc)
+        return single_doc
 
     def print_book(self) -> str:
         book = self.current_book
