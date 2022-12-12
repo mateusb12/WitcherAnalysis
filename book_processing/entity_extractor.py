@@ -2,10 +2,12 @@ import os
 import time
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import spacy
 from spacy import displacy
 from spacy.lang import en as english
+from spacy.pipeline import Sentencizer
 from spacy.tokens import Doc
 
 from path_reference.folder_reference import get_books_path, get_data_path, get_book_entities_path
@@ -26,7 +28,7 @@ def get_entities_location(input_series: str) -> Path:
 class BookAnalyser:
     def __init__(self, series: str = "witcher"):
         self.series_tag = series
-        self.NER: english = spacy.load('en_core_web_sm')
+        self.nlp: english = spacy.load('en_core_web_sm')
         self.all_books: list[os.DirEntry] = get_all_books(series)
         self.current_file = None
         self.current_book = None
@@ -55,17 +57,26 @@ class BookAnalyser:
             book_text = f.read()
             text_size = len(book_text)
             if text_size <= 1000000:
-                return self.NER(book_text)
+                return self.nlp(book_text)
             print("Big file detected. Splitting...")
             return self.__handle_big_file(book_text)
 
-    def __handle_big_file(self, file_content: str):
-        text_chunks = [file_content[i:i + 1000000] for i in range(0, len(file_content), 1000000)]
-        nlp_pot = [self.NER(chunk) for chunk in text_chunks]
-        single_doc = nlp_pot[0]
-        for doc in nlp_pot[1:]:
-            single_doc = single_doc.merge(doc)
+    def __handle_big_file(self, file_content: str) -> Doc:
+        """Natural language processing cannot handle strings over than 1 million characters. This function
+        splits the file into smaller chunks and applies nlp to each chunk. Then it merges everything
+         into a single Doc structure"""
+        self.nlp.disable_pipes()
+        self.nlp.add_pipe("sentencizer")
+        self.nlp.enable_pipe("sentencizer")
+        chunk_size = 500000
+        text_chunks = [file_content[i:i + chunk_size] for i in range(0, len(file_content), chunk_size)]
+        doc_list = list(self.nlp.pipe(text_chunks))
+        single_doc = Doc(self.nlp.vocab, words=[token.text for doc in doc_list for token in doc])
+        for i, token in enumerate(single_doc):
+            if token.text.startswith(".") or token.text.startswith("!") or token.text.startswith("?"):
+                single_doc[i].is_sent_start = True
         return single_doc
+        # return Doc(self.nlp.vocab, words=[token.text for doc in doc_list for token in doc])
 
     def print_book(self) -> str:
         book = self.current_book
