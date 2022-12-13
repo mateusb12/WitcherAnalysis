@@ -1,3 +1,5 @@
+import pandas as pd
+
 from book_processing.entity_extractor import BookAnalyser
 from book_processing.entity_filter import EntityFilter
 from book_processing.relationship_creator import RelationshipCreator
@@ -19,7 +21,7 @@ class Wrapper:
         self.book_number = book_number
         self.book_name = self.book_analyser.book_dict[self.book_number]
 
-    def book_pipeline(self) -> None:
+    def book_pipeline(self) -> pd.DataFrame:
         print("Entity dataframe analysis")
         entity_df = self.book_analyser.get_book_entity_df()
         self.entity_filter.set_entity_df(entity_df)
@@ -30,6 +32,8 @@ class Wrapper:
         relationship_df = self.relationship_creator.aggregate_network()
         self.node_plot.set_network_df(relationship_df)
         self.node_plot.pipeline()
+        degree_centrality_dict = self.node_plot.degree_dict
+        return pd.DataFrame.from_dict(degree_centrality_dict, orient='index')
 
     def get_centrality(self) -> dict:
         return self.node_plot.get_centrality()

@@ -24,6 +24,10 @@ def get_book_entities_path() -> Path:
     return Path(get_data_path(), 'books_entities')
 
 
+def get_book_importance_path() -> Path:
+    return Path(get_data_path(), 'books_importance')
+
+
 def get_webscrapping_path() -> Path:
     return Path(ref, 'webscrapping')
 

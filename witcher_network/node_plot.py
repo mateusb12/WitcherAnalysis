@@ -21,6 +21,9 @@ class NodePlot:
         self.network_df = None
         self.net = None
         self.G = None
+        self.degree_dict = {}
+        self.betweenness_dict = {}
+        self.closeness_dict = {}
 
     def set_network_df(self, input_df: pd.DataFrame):
         self.network_df = input_df
@@ -32,12 +35,12 @@ class NodePlot:
         nx.set_node_attributes(self.G, node_degree, 'size')
 
     def __set_centrality_measures(self):
-        degree_dict = nx.degree_centrality(self.G)
-        betweenness_dict = nx.betweenness_centrality(self.G)
-        closeness_dict = nx.closeness_centrality(self.G)
-        nx.set_node_attributes(self.G, degree_dict, 'degree_centrality')
-        nx.set_node_attributes(self.G, betweenness_dict, 'betweenness_centrality')
-        nx.set_node_attributes(self.G, closeness_dict, 'closeness_centrality')
+        self.degree_dict = nx.degree_centrality(self.G)
+        self.betweenness_dict = nx.betweenness_centrality(self.G)
+        self.closeness_dict = nx.closeness_centrality(self.G)
+        nx.set_node_attributes(self.G, self.degree_dict, 'degree_centrality')
+        nx.set_node_attributes(self.G, self.betweenness_dict, 'betweenness_centrality')
+        nx.set_node_attributes(self.G, self.closeness_dict, 'closeness_centrality')
 
     def __set_communities(self):
         communities = community_louvain.best_partition(self.G)

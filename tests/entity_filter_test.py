@@ -52,7 +52,8 @@ def get_harry_potter_unique_characters() -> list[str]:
 
 
 def __main():
-    aux = get_harry_potter_unique_characters()
+    test_witcher_main_characters()
+    test_harry_potter_main_characters()
     return
 
 
