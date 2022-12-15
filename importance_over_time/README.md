@@ -1,6 +1,6 @@
 
 # Character importance over time
-- Character importance is a measure of how much a given character is involved in the interactions and events of a book. In NLP context, this can be determined by analyzing the text of a book and using various techniques to identify the characters and their interactions. Once these interactions have been identified, they can be used to create a social graph, which is a visual representation of the relationships between the characters.
+Character importance is a measure of how much a given character is involved in the interactions and events of a book. In NLP context, this can be determined by analyzing the text of a book and using various techniques to identify the characters and their interactions. Once these interactions have been identified, they can be used to create a social graph, which is a visual representation of the relationships between the characters.
 
 ![Network graph](https://i.imgur.com/1UINepX.png)
 
