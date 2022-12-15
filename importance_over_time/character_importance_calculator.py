@@ -1,5 +1,4 @@
 import json
-import sys
 from pathlib import Path
 
 import pandas as pd
@@ -11,19 +10,19 @@ from wrap.wrapper import Wrapper
 
 
 def get_importance_example(series_name: str) -> list[str]:
+    """This function returns a list of characters that are important in a given series.
+    It does it by reading the most important characters json file and retrieving the list of characters"""
     most_relevant_characters_json_path = Path(get_book_importance_path(), "most_relevant_characters.json")
     with open(most_relevant_characters_json_path, 'r') as json_file:
         most_relevant_characters_dict = json.load(json_file)
         return most_relevant_characters_dict[series_name]
-    # if series_name.lower() == "witcher":
-    #     return ["Geralt", "Ciri", "Yennefer", "Dandelion", "Vesemir"]
-    # elif series_name.lower() == "harry_potter":
-    #     return ["Harry", "Ron", "Hermione", "Dumbledore", "Voldemort"]
-    # else:
-    #     return [""]
 
 
 def update_most_important_characters(series_name: str):
+    """This function updates the most important characters for a given series.
+    → It reads the character importance data from csv files, concatenating the data into a single dataframe and
+    sorting it by importance.
+    → Then it selects the top 5 unique characters by importance and updates this information to a json file."""
     __handle_importance_json()
     series_importance_folder = Path(get_book_importance_path(), f"{series_name}_books_importance")
     csv_files = [f for f in Path(series_importance_folder).iterdir() if f.is_file() and f.suffix == ".csv"]
@@ -50,6 +49,7 @@ def update_most_important_characters(series_name: str):
 
 
 def __handle_importance_json():
+    """If the importance json does not exist yet, this function creates it."""
     json_path = Path(get_book_importance_path(), "most_relevant_characters.json")
     if existing_json := json_path.exists():
         return
@@ -63,6 +63,9 @@ def __handle_importance_json():
 
 
 class CharacterImportanceOverTime:
+    """This class is used to analyze the importance of characters in a series of books over time.
+     It creates a folder to store the results of the analysis and produces CSV files for each book containing
+      the importance of each character."""
     def __init__(self, series_name: str = "witcher"):
         self.series_name = series_name
         self.series_importance_folder = Path()
@@ -108,6 +111,20 @@ class CharacterImportanceOverTime:
 
 
 def get_importance_df(series: str = "witcher", char_list: list[str] = None) -> pd.DataFrame:
+    """
+        Returns a DataFrame containing the importance of characters in a given book series.
+
+        → It retrieves the path to the folder where the book importance files are stored
+        → It reads the first few files in the series folder, up to a specified amount, and loads them
+        into a list of dataframes
+        → The dataframes are then concatenated into a single one and filtered to include only the characters
+         specified in the `char_list` parameter.
+
+        :param series: The name of the book series (defaults to "witcher").
+        :param char_list: A list of character names to include in the returned DataFrame (defaults to None,
+                          which includes all characters).
+        :return: A DataFrame containing the importance of characters in the specified book series.
+        """
     books_importance_folder = get_book_importance_path()
     series_importance_folder = Path(books_importance_folder, f"{series}_books_importance")
     files = [f for f in Path(series_importance_folder).iterdir() if f.is_file() and f.suffix == ".csv"]
@@ -128,7 +145,7 @@ def get_importance_df(series: str = "witcher", char_list: list[str] = None) -> p
 
 
 def plot_importance(importance_df: pd.DataFrame):
-    """Dataframe is in this format:
+    """Dataframe should follow this format:
     Character Name, Importance, Book Index
     Geralt, 0.5, 1
     Cirilla, 0.3, 1
