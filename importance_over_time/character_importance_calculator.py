@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 from matplotlib import pyplot as plt
 
+from fix_non_reachable_path import fix_non_reachable_path
 from path_reference.folder_reference import get_book_importance_path
 from wrap.wrapper import Wrapper
 
@@ -84,19 +85,6 @@ def plot_importance(importance_df: pd.DataFrame):
     plt.show()
 
 
-# def is_path_reference_folder_reachable():
-#     core_folder = Path(__file__).parent.parent
-#     ref = str(Path(core_folder, "path_reference"))
-#     path = sys.path
-#     return ref in path
-#
-#
-# def fix_non_reachable_path():
-#     core_folder = Path(__file__).parent.parent
-#     ref = str(Path(core_folder, "path_reference"))
-#     sys.path.append(ref)
-
-
 def __importance_pipeline():
     characters = get_importance_example()
     # create_importance_dataframes(series="witcher")
@@ -105,7 +93,7 @@ def __importance_pipeline():
     return
 
 
-# fix_non_reachable_path()
+fix_non_reachable_path()
 
 
 def __main():
