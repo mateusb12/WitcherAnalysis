@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -83,7 +84,20 @@ def plot_importance(importance_df: pd.DataFrame):
     plt.show()
 
 
-def __main():
+# def is_path_reference_folder_reachable():
+#     core_folder = Path(__file__).parent.parent
+#     ref = str(Path(core_folder, "path_reference"))
+#     path = sys.path
+#     return ref in path
+#
+#
+# def fix_non_reachable_path():
+#     core_folder = Path(__file__).parent.parent
+#     ref = str(Path(core_folder, "path_reference"))
+#     sys.path.append(ref)
+
+
+def __importance_pipeline():
     characters = get_importance_example()
     # create_importance_dataframes(series="witcher")
     importance_df = get_importance_df(series="witcher", char_list=characters)
@@ -91,6 +105,13 @@ def __main():
     return
 
 
+# fix_non_reachable_path()
+
+
+def __main():
+    print(sys.path)
+    # print(is_path_reference_folder_reachable())
+
+
 if __name__ == "__main__":
     __main()
-    print("Done")
