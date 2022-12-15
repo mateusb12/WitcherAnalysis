@@ -76,7 +76,6 @@ class BookAnalyser:
             if token.text.startswith(".") or token.text.startswith("!") or token.text.startswith("?"):
                 single_doc[i].is_sent_start = True
         return single_doc
-        # return Doc(self.nlp.vocab, words=[token.text for doc in doc_list for token in doc])
 
     def print_book(self) -> str:
         book = self.current_book

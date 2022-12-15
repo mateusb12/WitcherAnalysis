@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -5,15 +6,56 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from fix_non_reachable_path import fix_non_reachable_path
-from path_reference.folder_reference import get_book_importance_path
+from path_reference.folder_reference import get_book_importance_path, get_books_path
 from wrap.wrapper import Wrapper
 
 
 def get_importance_example(series_name: str) -> list[str]:
     if series_name.lower() == "witcher":
         return ["Geralt", "Ciri", "Yennefer", "Dandelion", "Vesemir"]
+    elif series_name.lower() == "harry_potter":
+        return ["Harry", "Ron", "Hermione", "Dumbledore", "Voldemort"]
     else:
         return [""]
+
+
+def update_most_important_characters(series_name: str):
+    __handle_importance_json()
+    series_importance_folder = Path(get_book_importance_path(), f"{series_name}_books_importance")
+    csv_files = [f for f in Path(series_importance_folder).iterdir() if f.is_file() and f.suffix == ".csv"]
+    importance_pot = []
+    for csv_file in csv_files:
+        importance_df = pd.read_csv(csv_file, encoding="utf-8")
+        importance_df = importance_df.rename(columns={importance_df.columns[0]: "Character Name",
+                                                      importance_df.columns[1]: "Importance"})
+        importance_df = importance_df.sort_values(by="Importance", ascending=False)
+        book_index = int(csv_file.stem.split(" ")[0])
+        importance_df["Book Index"] = book_index
+        importance_pot.append(importance_df.iloc[:5])
+    concatenated_pot = pd.concat(importance_pot)
+    concatenated_pot = concatenated_pot.sort_values(by="Importance", ascending=False)
+    concatenated_pot = concatenated_pot.drop_duplicates(subset="Character Name", keep="first")
+    most_relevant_character_names = concatenated_pot["Character Name"].tolist()[:5]
+    json_path = Path(get_book_importance_path(), "most_relevant_characters.json")
+    with open(json_path, 'r') as json_file:
+        series_dict = json.load(json_file)
+    series_dict[series_name] = most_relevant_character_names
+    with open(json_path, 'w') as json_file:
+        json.dump(series_dict, json_file)
+    return
+
+
+def __handle_importance_json():
+    json_path = Path(get_book_importance_path(), "most_relevant_characters.json")
+    if existing_json := json_path.exists():
+        return
+    books_folder = get_books_path()
+    series_folders = [f.name for f in Path(books_folder).iterdir() if f.is_dir()]
+    series_names = [book.replace('_books', '') for book in series_folders]
+    series_dict = {series: 0 for series in series_names}
+    with open(json_path, 'w') as json_file:
+        json.dump(series_dict, json_file)
+    return
 
 
 class CharacterImportanceOverTime:
@@ -42,7 +84,7 @@ class CharacterImportanceOverTime:
         return [f for f in Path(self.series_importance_folder).iterdir() if f.suffix == ".csv"]
 
     def __get_missing_csv_files(self, existing_csv_files: list[Path]) -> list[int]:
-        max_book_index = int(existing_csv_files[-1].name.split(" ")[0])
+        max_book_index = int(existing_csv_files[-1].name.split(" ")[0]) if existing_csv_files else 0
         return list(range(max_book_index + 1, self.amount_of_books + 1))
 
     def __create_importance_dataframes(self):
@@ -62,8 +104,6 @@ class CharacterImportanceOverTime:
 
 
 def get_importance_df(series: str = "witcher", char_list: list[str] = None) -> pd.DataFrame:
-    if char_list is None:
-        char_list = ["Geralt", "Ciri", "Yennefer", "Dandelion", "Vesemir"]
     books_importance_folder = get_book_importance_path()
     series_importance_folder = Path(books_importance_folder, f"{series}_books_importance")
     files = [f for f in Path(series_importance_folder).iterdir() if f.is_file() and f.suffix == ".csv"]
@@ -117,7 +157,7 @@ def plot_importance(importance_df: pd.DataFrame):
 def plot_series_importance(series_name: str):
     characters = get_importance_example(series_name)
     cio = CharacterImportanceOverTime(series_name)
-    cio.run(amount_of_books=3)
+    cio.run(amount_of_books=5)
     importance_df = get_importance_df(series=series_name, char_list=characters)
     plot_importance(importance_df)
     return
@@ -127,8 +167,10 @@ fix_non_reachable_path()
 
 
 def __main():
-    plot_series_importance("witcher")
-    # print(is_path_reference_folder_reachable())
+    # plot_series_importance("harry_potter")
+    update_most_important_characters("witcher")
+    update_most_important_characters("harry_potter")
+    # update_most_important_characters("twilight")
 
 
 if __name__ == "__main__":
