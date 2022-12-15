@@ -27,6 +27,10 @@ def _filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
 
 
 class EntityFilter:
+    """This function is used to filter the entity dataframe, only including character entities.
+    The characters.csv file is loaded from the book_characters folder.
+    It should be obtained through web scrapping the book wiki page.
+    There are already some examples in the folder, for the series 'The Witcher', 'Harry Potter' and 'Twilight'. """
     def __init__(self, series: str = "witcher"):
         self.entity_df = None
         character_path = Path(get_data_path(), "books_characters", f"{series}_characters.csv")

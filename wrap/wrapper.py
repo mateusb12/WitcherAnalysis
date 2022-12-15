@@ -8,6 +8,11 @@ from witcher_network.node_plot import NodePlot
 
 class Wrapper:
     def __init__(self, series: str = "witcher"):
+        """This class is the heart of the project. This class
+        → 1. Reads the books and creates the entity dataframe
+        → 2. Filters the entity dataframe, only including character entities
+        → 3. Creates the network dataframe, stating who is connected to who
+        → 4. Creates the network plot, storing the network in a .html file"""
         self.book_analyser = BookAnalyser()
         self.book_analyser.set_new_series(series)
         self.entity_filter = EntityFilter(series=series)

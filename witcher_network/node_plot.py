@@ -17,6 +17,7 @@ class Centrality(enum.Enum):
 
 
 class NodePlot:
+    """This class is used to plot the networkx graph using pyvis library."""
     def __init__(self):
         self.network_df = None
         self.net = None

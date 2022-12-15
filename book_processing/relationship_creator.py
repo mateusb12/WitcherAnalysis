@@ -15,6 +15,7 @@ class RelationshipCreator:
 
     @staticmethod
     def __remove_duplicates(input_list: list[str]) -> list[str]:
+        """Removes duplicates strings from a list of strings"""
         maximum_size = len(input_list) - 1
         unique_list = []
         for index, item in enumerate(input_list):
@@ -26,6 +27,8 @@ class RelationshipCreator:
 
     @staticmethod
     def __get_relationship_list(unique_list: list[str]) -> list:
+        """Creates a list of tuples, where each tuple is a relationship between two characters
+        Then returns a list of all the relationships, in the format 'source': source, 'target': target}"""
         if len(unique_list) <= 1:
             return []
         relationship_list = []
@@ -43,7 +46,8 @@ class RelationshipCreator:
         cols = input_dataframe.columns
         return pd.DataFrame(sorted_table, columns=cols)
 
-    def __loop_window(self) -> pd.DataFrame:
+    def __extract_relationships_from_entities(self) -> pd.DataFrame:
+        """Iterates over the entity dataframe and creates relationships between entities within a given window size"""
         maximum_df_index = len(self.entity_df)
         relationship_pot = []
 
@@ -57,8 +61,11 @@ class RelationshipCreator:
         return pd.DataFrame(relationship_pot)
 
     def aggregate_network(self, window_size: int = 5) -> pd.DataFrame:
+        """Aggregates the relationships created by __loop_window
+        Returns a dataframe containing the relationships between entities in the input dataframe.
+        The window size can be optionally specified."""
         self.window_size = window_size
-        raw_df = self.__loop_window()
+        raw_df = self.__extract_relationships_from_entities()
         network_df = self.__bidirectional_sort(raw_df)
         network_df["value"] = 1
         return network_df.groupby(["source", "target"], sort=False, as_index=False).sum()

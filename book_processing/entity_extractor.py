@@ -26,6 +26,8 @@ def get_entities_location(input_series: str) -> Path:
 
 
 class BookAnalyser:
+    """This class is used to extract entities from a book.
+     It analyses each book and creates an entities.csv file in the book_entities folder."""
     def __init__(self, series: str = "witcher"):
         self.series_tag = series
         self.nlp: english = spacy.load('en_core_web_sm')
@@ -62,9 +64,9 @@ class BookAnalyser:
             return self.__handle_big_file(book_text)
 
     def __handle_big_file(self, file_content: str) -> Doc:
-        """Natural language processing cannot handle strings over than 1 million characters. This function
-        splits the file into smaller chunks and applies nlp to each chunk. Then it merges everything
-         into a single Doc structure"""
+        """Natural language processing modules cannot handle strings over than 1 million characters.
+         This function splits the large file into smaller chunks and applies nlp to each chunk.
+         Then it merges everything into a single Doc structure"""
         self.nlp.disable_pipes()
         self.nlp.add_pipe("sentencizer")
         self.nlp.enable_pipe("sentencizer")
@@ -101,8 +103,8 @@ class BookAnalyser:
             if index % 10 == 0:
                 print(f"Processing sentence {index} of {size} ({percentage}%), speed: {round(speed, 2)} sentences/s,"
                       f"ETA {eta_str}")
-            aux = [entity.text for entity in sentence.ents]
-            if entity_list := aux:
+            entities = [entity.text for entity in sentence.ents]
+            if entity_list := entities:
                 entrance = {"sentence": sentence, "entities": entity_list}
                 entity_pot.append(entrance)
         return pd.DataFrame(entity_pot)
@@ -115,12 +117,12 @@ class BookAnalyser:
 
     def get_book_entity_df(self) -> pd.DataFrame:
         if not self.__existing_file():
-            return self._handle_not_found_book_entity_df()
+            return self._create_book_entity_df()
         print(f"File [{self.__get_file_tag()}] already exists")
         ref = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
         return pd.read_csv(ref)
 
-    def _handle_not_found_book_entity_df(self):
+    def _create_book_entity_df(self):
         print("Book entity not found. Processing a new one...")
         book_entities = self.__get_book_entities()
         output_location = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
@@ -130,7 +132,7 @@ class BookAnalyser:
 
     @staticmethod
     def handle_new_folder(output_location):
-        """ Creates a new folder if it doesn't exist """
+        """ Create a new output folder if it doesn't already exist, with an __init__.py` file inside. """
         output_folder = output_location.parent
         if not output_folder.exists():
             output_folder.mkdir(parents=True)
