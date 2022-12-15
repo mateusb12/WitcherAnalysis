@@ -9,26 +9,56 @@ from path_reference.folder_reference import get_book_importance_path
 from wrap.wrapper import Wrapper
 
 
-def get_importance_example() -> list[str]:
-    return ["Geralt", "Ciri", "Yennefer", "Dandelion", "Vesemir"]
+def get_importance_example(series_name: str) -> list[str]:
+    if series_name.lower() == "witcher":
+        return ["Geralt", "Ciri", "Yennefer", "Dandelion", "Vesemir"]
+    else:
+        return [""]
 
 
-def create_importance_dataframes(series: str = "witcher"):
-    books_importance_folder = get_book_importance_path()
-    series_importance_folder = Path(books_importance_folder, f"{series}_books_importance")
-    if not Path(series_importance_folder).is_dir():
-        Path(series_importance_folder).mkdir(parents=True, exist_ok=True)
-        Path(series_importance_folder, "__init__.py").touch()
-    w = Wrapper(series=series)
-    amount = 3
-    for i in range(1, amount + 1):
-        w.set_book(i)
-        book_name = w.book_name
-        csv_output = Path(series_importance_folder, f"{book_name}_importance.csv")
-        if Path(csv_output).is_file():
-            continue
-        relationship_df = w.book_pipeline()
-        relationship_df.to_csv(csv_output, index=True, encoding="utf-8")
+class CharacterImportanceOverTime:
+    def __init__(self, series_name: str = "witcher"):
+        self.series_name = series_name
+        self.series_importance_folder = Path()
+        self.amount_of_books = 0
+
+    def run(self, amount_of_books: int = 3):
+        self.amount_of_books = amount_of_books
+        existing_folder = self.__check_existing_importance_folder()
+        if not existing_folder:
+            self.__create_importance_folder()
+        self.__create_importance_dataframes()
+
+    def __check_existing_importance_folder(self) -> bool:
+        books_importance_folder = get_book_importance_path()
+        self.series_importance_folder = Path(books_importance_folder, f"{self.series_name}_books_importance")
+        return Path(self.series_importance_folder).is_dir()
+
+    def __create_importance_folder(self):
+        Path(self.series_importance_folder).mkdir(parents=True, exist_ok=True)
+        Path(self.series_importance_folder, "__init__.py").touch()
+
+    def __get_existing_csv_files(self) -> list[Path]:
+        return [f for f in Path(self.series_importance_folder).iterdir() if f.suffix == ".csv"]
+
+    def __get_missing_csv_files(self, existing_csv_files: list[Path]) -> list[int]:
+        max_book_index = int(existing_csv_files[-1].name.split(" ")[0])
+        return list(range(max_book_index + 1, self.amount_of_books + 1))
+
+    def __create_importance_dataframes(self):
+        existing_csv_files = self.__get_existing_csv_files()
+        missing_books = self.__get_missing_csv_files(existing_csv_files)
+        if not missing_books:
+            return
+        w = Wrapper(series=self.series_name)
+        for i in missing_books:
+            w.set_book(i)
+            book_name = w.book_name
+            csv_output = Path(self.series_importance_folder, f"{book_name}_importance.csv")
+            if Path(csv_output).is_file():
+                continue
+            relationship_df = w.book_pipeline()
+            relationship_df.to_csv(csv_output, index=True, encoding="utf-8")
 
 
 def get_importance_df(series: str = "witcher", char_list: list[str] = None) -> pd.DataFrame:
@@ -50,7 +80,6 @@ def get_importance_df(series: str = "witcher", char_list: list[str] = None) -> p
         book_pot.append(relationship_df)
     final_df = pd.concat(book_pot)
     final_df = final_df[final_df["Character Name"].isin(char_list)]
-    # final_df.index += 1
     return final_df
 
 
@@ -85,10 +114,11 @@ def plot_importance(importance_df: pd.DataFrame):
     plt.show()
 
 
-def __importance_pipeline():
-    characters = get_importance_example()
-    # create_importance_dataframes(series="witcher")
-    importance_df = get_importance_df(series="witcher", char_list=characters)
+def plot_series_importance(series_name: str):
+    characters = get_importance_example(series_name)
+    cio = CharacterImportanceOverTime(series_name)
+    cio.run(amount_of_books=3)
+    importance_df = get_importance_df(series=series_name, char_list=characters)
     plot_importance(importance_df)
     return
 
@@ -97,7 +127,7 @@ fix_non_reachable_path()
 
 
 def __main():
-    print(sys.path)
+    plot_series_importance("witcher")
     # print(is_path_reference_folder_reachable())
 
 
