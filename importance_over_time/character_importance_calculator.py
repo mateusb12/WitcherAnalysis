@@ -11,12 +11,16 @@ from wrap.wrapper import Wrapper
 
 
 def get_importance_example(series_name: str) -> list[str]:
-    if series_name.lower() == "witcher":
-        return ["Geralt", "Ciri", "Yennefer", "Dandelion", "Vesemir"]
-    elif series_name.lower() == "harry_potter":
-        return ["Harry", "Ron", "Hermione", "Dumbledore", "Voldemort"]
-    else:
-        return [""]
+    most_relevant_characters_json_path = Path(get_book_importance_path(), "most_relevant_characters.json")
+    with open(most_relevant_characters_json_path, 'r') as json_file:
+        most_relevant_characters_dict = json.load(json_file)
+        return most_relevant_characters_dict[series_name]
+    # if series_name.lower() == "witcher":
+    #     return ["Geralt", "Ciri", "Yennefer", "Dandelion", "Vesemir"]
+    # elif series_name.lower() == "harry_potter":
+    #     return ["Harry", "Ron", "Hermione", "Dumbledore", "Voldemort"]
+    # else:
+    #     return [""]
 
 
 def update_most_important_characters(series_name: str):
@@ -157,7 +161,7 @@ def plot_importance(importance_df: pd.DataFrame):
 def plot_series_importance(series_name: str):
     characters = get_importance_example(series_name)
     cio = CharacterImportanceOverTime(series_name)
-    cio.run(amount_of_books=5)
+    cio.run(amount_of_books=3)
     importance_df = get_importance_df(series=series_name, char_list=characters)
     plot_importance(importance_df)
     return
@@ -167,9 +171,9 @@ fix_non_reachable_path()
 
 
 def __main():
-    # plot_series_importance("harry_potter")
-    update_most_important_characters("witcher")
-    update_most_important_characters("harry_potter")
+    plot_series_importance("twilight")
+    # update_most_important_characters("witcher")
+    # update_most_important_characters("harry_potter")
     # update_most_important_characters("twilight")
 
 

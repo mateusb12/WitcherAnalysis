@@ -69,9 +69,12 @@ class BookAnalyser:
         self.nlp.add_pipe("sentencizer")
         self.nlp.enable_pipe("sentencizer")
         chunk_size = 500000
+        print("[Big file analysis]   Getting text chunks (1/3)")
         text_chunks = [file_content[i:i + chunk_size] for i in range(0, len(file_content), chunk_size)]
         doc_list = list(self.nlp.pipe(text_chunks))
+        print("[Big file analysis]   Generating single doc (2/3)")
         single_doc = Doc(self.nlp.vocab, words=[token.text for doc in doc_list for token in doc])
+        print("[Big file analysis]   Analysing single doc (3/3)")
         for i, token in enumerate(single_doc):
             if token.text.startswith(".") or token.text.startswith("!") or token.text.startswith("?"):
                 single_doc[i].is_sent_start = True
@@ -92,14 +95,16 @@ class BookAnalyser:
             time_elapsed_seconds = round(time.time() - time_start, 2)
             speed = index / time_elapsed_seconds if time_elapsed_seconds != 0 else 1
             remaining_sentences = size - index
-            remaining_seconds = round(remaining_sentences / speed, 2)
+            remaining_seconds = round(remaining_sentences / speed, 2) if speed != 0 else 0
             eta = time_start + remaining_seconds
             eta_str = time.strftime("%H:%M:%S", time.localtime(eta))
             if index % 10 == 0:
                 print(f"Processing sentence {index} of {size} ({percentage}%), speed: {round(speed, 2)} sentences/s,"
                       f"ETA {eta_str}")
-            if entity_list := [entity.text for entity in sentence.ents]:
-                entity_pot.append({"sentence": sentence, "entities": entity_list})
+            aux = [entity.text for entity in sentence.ents]
+            if entity_list := aux:
+                entrance = {"sentence": sentence, "entities": entity_list}
+                entity_pot.append(entrance)
         return pd.DataFrame(entity_pot)
 
     def __get_file_tag(self) -> str:
@@ -109,17 +114,19 @@ class BookAnalyser:
         return Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}").exists()
 
     def get_book_entity_df(self) -> pd.DataFrame:
-        if existing_file := self.__existing_file():
-            print(f"File [{self.__get_file_tag()}] already exists")
-            ref = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
-            return pd.read_csv(ref)
-        else:
-            print("Book entity not found. Processing a new one...")
-            book_entities = self.__get_book_entities()
-            output_location = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
-            self.handle_new_folder(output_location)
-            book_entities.to_csv(output_location, index=False)
-            return book_entities
+        if not self.__existing_file():
+            return self._handle_not_found_book_entity_df()
+        print(f"File [{self.__get_file_tag()}] already exists")
+        ref = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
+        return pd.read_csv(ref)
+
+    def _handle_not_found_book_entity_df(self):
+        print("Book entity not found. Processing a new one...")
+        book_entities = self.__get_book_entities()
+        output_location = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
+        self.handle_new_folder(output_location)
+        book_entities.to_csv(output_location, index=False)
+        return book_entities
 
     @staticmethod
     def handle_new_folder(output_location):

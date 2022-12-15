@@ -44,7 +44,7 @@ class Wrapper:
 
 def __main():
     w = Wrapper("harry_potter")
-    w.set_book(2)
+    w.set_book(4)
     w.book_pipeline()
     w.plot()
     print("wow")
