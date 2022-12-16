@@ -28,7 +28,7 @@ class RelationshipCreator:
     @staticmethod
     def __get_relationship_list(unique_list: list[str]) -> list:
         """Creates a list of tuples, where each tuple is a relationship between two characters
-        Then returns a list of all the relationships, in the format 'source': source, 'target': target}"""
+        Then returns a list of all the relationships, in the format {'source': source, 'target': target}"""
         if len(unique_list) <= 1:
             return []
         relationship_list = []
@@ -61,7 +61,7 @@ class RelationshipCreator:
         return pd.DataFrame(relationship_pot)
 
     def aggregate_network(self, window_size: int = 5) -> pd.DataFrame:
-        """Aggregates the relationships created by __loop_window
+        """Aggregates the relationships created by __extract_relationships_from_entities()
         Returns a dataframe containing the relationships between entities in the input dataframe.
         The window size can be optionally specified."""
         self.window_size = window_size

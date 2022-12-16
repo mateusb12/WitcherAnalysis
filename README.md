@@ -19,7 +19,15 @@ entities" filtered dataframe
 ![sample image](https://i.imgur.com/d1l1ToA.png)
 - You can also try importance plots
 ![sample image](https://i.imgur.com/XLigFm2.png)
-## How to run
+## Interface GUI
+You can also use an interface
+```
+gui/interface.py
+__main()
+```
+
+![sample image](https://i.imgur.com/xe1tTvl.pngg)
+## How to run via code
 Scrapping the character wiki
 ```
 webscrapping/witcher_scrapping.py
