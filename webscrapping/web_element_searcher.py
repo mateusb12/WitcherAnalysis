@@ -31,13 +31,12 @@ class WebElementSearcher:
         velocity = self.attempts / time_so_far if time_so_far != 0 else 0
         rounded_velocity = round(velocity, 2)
         remaining_elements = ELEMENT_AMOUNT - len(self.elements_found_so_far)
-        remaining_time = remaining_elements / velocity if velocity != 0 else 0
-        formatted_remaining_time = convert_time_format(time.strftime('%H:%M:%S', time.gmtime(remaining_time)))
-        eta = right_now + remaining_time
-        formatted_eta = time.strftime('%H:%M:%S', time.gmtime(eta))
-        print(f"Attempt #{self.attempts}, Velocity: {rounded_velocity} elements/s,"
-              f" Remaining time: {formatted_remaining_time},"
-              f" ETA: {formatted_eta}")
+        remaining_time_seconds = remaining_elements / velocity if velocity != 0 else 0
+        formatted_remaining_time = convert_time_format(time.strftime('%H:%M:%S',
+                                                                     time.gmtime(remaining_time_seconds)))
+        current_percentage = round(self.attempts / ELEMENT_AMOUNT * 100, 2)
+        print(f"Attempt #{self.attempts} ({current_percentage}%), Velocity: {rounded_velocity} elements/s"
+              f" Remaining time: {formatted_remaining_time}")
         # Get all child elements of the current element
         children_elements = element.find_elements(By.XPATH, './*')
 
