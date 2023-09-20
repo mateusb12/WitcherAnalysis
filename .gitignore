@@ -4,3 +4,4 @@ jupyter_notebooks/geckodriver.log
 jupyter_notebooks/geckodriver.exe
 jupyter_notebooks/witcher.html
 wrap/witcher.html
+/.env
