@@ -38,7 +38,7 @@ class RedditScrapper:
         self.__load_website()
         self.__login_process()
         self.__load_saved_items_page()
-        self.collect_saved_items_links()
+        # self.collect_saved_items_links()
         # self.driver.close()
 
     def __load_website(self) -> None:
