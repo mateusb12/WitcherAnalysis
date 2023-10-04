@@ -31,24 +31,44 @@ class RedditScrapper:
         load_dotenv()
         s = Service(str(get_driver_path()))
         self.driver = webdriver.Firefox(service=s)
-        self.page_url: str = "https://www.reddit.com/user/mateusb12/saved/"
+        self.page_url: str = "https://www.reddit.com/login"
         self.saved_links = []
 
     def run(self):
         self.__load_website()
-        # self.__close_google_login_popup()
-        # self.__login_process()
+        self.__login_process()
+        self.__load_saved_items_page()
+        self.collect_saved_items_links()
         # self.driver.close()
 
     def __load_website(self) -> None:
         self.driver.get(self.page_url)
         self.driver.implicitly_wait(1)
-        # self.__close_cookies_window()
+
+    def __login_process(self):
+        username = os.getenv("REDDIT_USERNAME")
+        password = os.getenv("REDDIT_PASSWORD")
+        login_input_id = "loginUsername"
+        login_element = self.driver.find_element(By.ID, login_input_id)
+        login_element.send_keys(username)
+        password_input_id = "loginPassword"
+        password_element = self.driver.find_element(By.ID, password_input_id)
+        password_element.send_keys(password)
+        button_xpath = "/html/body/div/main/div[1]/div/div[2]/form/fieldset[5]/button"
+        button_element = self.driver.find_element(By.XPATH, button_xpath)
+        time.sleep(1)
+        button_element.click()
+        time.sleep(5)
+
+    def __load_saved_items_page(self):
+        username = os.getenv("REDDIT_USERNAME")
+        saved_items_url = f"https://www.reddit.com/user/{username}/saved/"
+        self.driver.get(saved_items_url)
+        self.driver.implicitly_wait(1)
 
     def collect_saved_items_links(self):
         main_list = self.__get_main_list_element()
-        main_list_children = main_list.find_elements(By.XPATH, ".//*")
-        for element in main_list_children:
+        for element in main_list:
             link = self.__get_link_from_single_element(element)
             self.saved_links.append(link)
 
