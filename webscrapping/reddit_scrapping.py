@@ -1,8 +1,12 @@
 import os
-
+import time
+import pyperclip
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
+
 from path_reference.folder_reference import get_driver_path
 from dotenv import load_dotenv
 
@@ -27,13 +31,13 @@ class RedditScrapper:
         load_dotenv()
         s = Service(str(get_driver_path()))
         self.driver = webdriver.Firefox(service=s)
-        self.page_url: str = "https://www.reddit.com/"
-        self.book_links = {}
-        self.characters = []
+        self.page_url: str = "https://www.reddit.com/user/mateusb12/saved/"
+        self.saved_links = []
 
     def run(self):
         self.__load_website()
-        self.__login_process()
+        # self.__close_google_login_popup()
+        # self.__login_process()
         # self.driver.close()
 
     def __load_website(self) -> None:
@@ -41,32 +45,30 @@ class RedditScrapper:
         self.driver.implicitly_wait(1)
         # self.__close_cookies_window()
 
-    def __login_process(self):
-        self.__press_first_login_button()
-        self.driver.implicitly_wait(3)
-        self.__type_login_information()
-        self.__press_second_login_button()
+    def collect_saved_items_links(self):
+        main_list = self.__get_main_list_element()
+        main_list_children = main_list.find_elements(By.XPATH, ".//*")
+        for element in main_list_children:
+            link = self.__get_link_from_single_element(element)
+            self.saved_links.append(link)
 
-    def __press_first_login_button(self):
-        xpath = ("/html/body/shreddit-app/reddit-header-large/reddit-header-action-items/header/nav/div[3]/span[3]/"
-                 "faceplate-tracker/faceplate-tooltip/a/span/span")
-        login_button = self.driver.find_element(By.XPATH, xpath)
-        login_button.click()
+    def __get_main_list_element(self):
+        main_list_xpath = "/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[2]/div[3]/div[1]/div[2]/div[1]"
+        main_list = self.driver.find_element(By.XPATH, main_list_xpath)
+        return main_list.find_elements(By.XPATH, ".//*")
 
-    def __type_login_information(self):
-        email_xpath = '//body/shreddit-app[1]/div[1]/div[1]'
-        password_xpath = '//*[@id="left-sidebar-container"]'
-        email_input = self.driver.find_element(By.XPATH, email_xpath)
-        password_input = self.driver.find_element(By.XPATH, password_xpath)
-        login = os.environ["REDDIT_LOGIN"]
-        password = os.environ["REDDIT_PASSWORD"]
-        email_input.send_keys(login)
-        password_input.send_keys(password)
+    def __get_link_from_single_element(self, element):
+        primary_button = element.find_element(By.XPATH, ".//button[@data-click-id='share']")
+        primary_button.click()
 
-    def __press_second_login_button(self):
-        login_button_xpath = '/html/body/div/main/div[1]/div/div/form/fieldset[4]/button'
-        login_button = self.driver.find_element(By.XPATH, login_button_xpath)
-        login_button.click()
+        sub_buttons_xpath = ".//button"
+        sub_buttons = self.driver.find_elements(By.XPATH, sub_buttons_xpath)
+        menuitem_buttons = [button for button in sub_buttons if button.get_attribute('role') == 'menuitem']
+        first_menu_item_button = menuitem_buttons[0]
+        first_menu_item_button.click()
+
+        time.sleep(1)
+        return pyperclip.paste()
 
 
 def __main():
