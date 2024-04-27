@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 import pandas as pd
 
-from book_processing.entity_filter import EntityFilter
+from nlp_processing.entity_filter import EntityFilter
 from path_reference.folder_reference import get_data_path, get_books_entities_path, get_book_characters_path, \
     get_books_path
 

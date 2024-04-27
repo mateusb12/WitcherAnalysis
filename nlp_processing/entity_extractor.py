@@ -1,19 +1,19 @@
 import os
 import time
 from pathlib import Path
+from typing import Optional
 
-import numpy as np
 import pandas as pd
 import spacy
 from spacy import displacy
 from spacy.lang import en as english
-from spacy.pipeline import Sentencizer
 from spacy.tokens import Doc
 
-from path_reference.folder_reference import get_books_path, get_data_path, get_book_entities_path
+from path_reference.folder_reference import get_books_path, get_book_entities_path
+from utils.folder_utils import handle_new_folder
 
 
-def get_all_books(input_series: str) -> list[os.DirEntry]:
+def list_all_book_files(input_series: str) -> list[os.DirEntry]:
     book_path = get_books_path()
     series_book_path = Path(book_path, f"{input_series}_books")
     aux = [book for book in os.scandir(series_book_path) if '.txt' in book.name]
@@ -21,25 +21,26 @@ def get_all_books(input_series: str) -> list[os.DirEntry]:
     return aux
 
 
-def get_entities_location(input_series: str) -> Path:
+def get_entities_file_path(input_series: str) -> Path:
     return Path(get_book_entities_path(), f"{input_series}_books_entities")
 
 
-class BookAnalyser:
+class EntityExtractor:
     """This class is used to extract entities from a book.
      It analyses each book and creates an entities.csv file in the book_entities folder."""
     def __init__(self, series: str = "witcher"):
         self.series_tag = series
         self.nlp: english = spacy.load('en_core_web_sm')
-        self.all_books: list[os.DirEntry] = get_all_books(series)
-        self.current_file = None
-        self.current_book = None
-        self.book_dict = self.get_book_dict()
+        print("NLP model loaded")
+        self.all_books: list[os.DirEntry] = list_all_book_files(series)
+        self.current_file: Optional[os.DirEntry] = None
+        self.current_book: Optional[Doc] = None
+        self.book_names_dict = self.get_book_dict()
 
     def set_new_series(self, input_series: str):
         self.series_tag = input_series
-        self.all_books = get_all_books(input_series)
-        self.book_dict = self.get_book_dict()
+        self.all_books = list_all_book_files(input_series)
+        self.book_names_dict = self.get_book_dict()
 
     def get_book_dict(self) -> dict:
         return {index: book.name.split('.')[0] for index, book in enumerate(self.all_books) if index != 0}
@@ -84,7 +85,6 @@ class BookAnalyser:
 
     def print_book(self) -> str:
         book = self.current_book
-        # example = self.__apply_nlp(book)
         return spacy.displacy.render(book[:100], style="ent", jupyter=True, minify=True)
 
     def __get_book_entities(self) -> pd.DataFrame:
@@ -109,41 +109,37 @@ class BookAnalyser:
                 entity_pot.append(entrance)
         return pd.DataFrame(entity_pot)
 
+
+    def get_book_entity_table(self) -> pd.DataFrame:
+        if not self.__existing_entity_file():
+            return self._create_new_book_entity_table()
+        return self._read_existing_book_entity_table()
+
     def __get_file_tag(self) -> str:
         return f"{self.current_file.name.split('.')[0]}.csv"
 
-    def __existing_file(self) -> bool:
-        return Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}").exists()
+    def __existing_entity_file(self) -> bool:
+        return Path(get_entities_file_path(self.series_tag), f"{self.__get_file_tag()}").exists()
 
-    def get_book_entity_df(self) -> pd.DataFrame:
-        if not self.__existing_file():
-            return self._create_book_entity_df()
-        print(f"File [{self.__get_file_tag()}] already exists")
-        ref = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
-        return pd.read_csv(ref)
-
-    def _create_book_entity_df(self):
+    def _create_new_book_entity_table(self) -> pd.DataFrame:
         print("Book entity not found. Processing a new one...")
-        book_entities = self.__get_book_entities()
-        output_location = Path(get_entities_location(self.series_tag), f"{self.__get_file_tag()}")
-        self.handle_new_folder(output_location)
+        book_entities: pd.DataFrame = self.__get_book_entities()
+        output_location = Path(get_entities_file_path(self.series_tag), f"{self.__get_file_tag()}")
+        handle_new_folder(output_location)
         book_entities.to_csv(output_location, index=False)
         return book_entities
 
-    @staticmethod
-    def handle_new_folder(output_location):
-        """ Create a new output folder if it doesn't already exist, with an __init__.py` file inside. """
-        output_folder = output_location.parent
-        if not output_folder.exists():
-            output_folder.mkdir(parents=True)
-            Path(output_folder, "__init__.py").touch()
+    def _read_existing_book_entity_table(self) -> pd.DataFrame:
+        print(f"File [{self.__get_file_tag()}] already exists")
+        ref = Path(get_entities_file_path(self.series_tag), f"{self.__get_file_tag()}")
+        return pd.read_csv(ref)
 
 
 def __save_entities_df():
-    book_analyser = BookAnalyser(series="harry_potter")
+    book_analyser = EntityExtractor(series="harry_potter")
     book_analyser.select_book(1)
     aux2 = book_analyser.print_book()
-    aux = book_analyser.get_book_entity_df()
+    aux = book_analyser.get_book_entity_table()
     return 0
 
 

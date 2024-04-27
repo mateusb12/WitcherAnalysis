@@ -3,14 +3,14 @@ import tkinter as tk
 from tkinter import ttk
 from typing import List
 
-from gui.utils import get_book_folders, get_book_names
-from wrap.existing_graphs import retrieve_book
-from wrap.wrapper import Wrapper
+from interfaces.utils import get_book_folders, get_book_names
+from scripts.existing_graphs import retrieve_book
+from scripts.wrapper import Runner
 
 
 class BookSelector:
     def __init__(self, window_size: tuple[int, int] = (500, 500)):
-        self.wrapper = Wrapper()
+        self.wrapper = Runner()
         self.root = tk.Tk()
         self.window_width = window_size[0]
         self.window_height = window_size[1]
@@ -82,7 +82,7 @@ class BookSelector:
         book_number = int(book_match.group())
         existing_book = retrieve_book(chosen_book)
         if not existing_book:
-            new_wrapper = Wrapper(series=chosen_series)
+            new_wrapper = Runner(series=chosen_series)
             new_wrapper.set_book(book_number)
             new_wrapper.book_pipeline()
             new_wrapper.plot()

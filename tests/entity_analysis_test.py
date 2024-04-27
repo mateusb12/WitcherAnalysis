@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from book_processing.entity_extractor import BookAnalyser
+from nlp_processing.entity_extractor import EntityExtractor
 from path_reference.folder_reference import get_books_entities_path, get_books_path
 
 
 class TestBookAnalyser(unittest.TestCase):
     def setUp(self):
-        self.analyser = BookAnalyser(series="harry_potter")
+        self.analyser = EntityExtractor(series="harry_potter")
 
     def test_set_new_series(self):
         # Test that set_new_series() correctly sets the series_tag and all_books attributes

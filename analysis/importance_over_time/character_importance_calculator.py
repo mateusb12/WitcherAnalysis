@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 from fix_non_reachable_path import fix_non_reachable_path
 from path_reference.folder_reference import get_book_importance_path, get_books_path
-from wrap.wrapper import Wrapper
+from scripts.wrapper import Runner
 
 
 def get_importance_example(series_name: str) -> list[str]:
@@ -99,7 +99,7 @@ class CharacterImportanceOverTime:
         missing_books = self.__get_missing_csv_files(existing_csv_files)
         if not missing_books:
             return
-        w = Wrapper(series=self.series_name)
+        w = Runner(series=self.series_name)
         for i in missing_books:
             w.set_book(i)
             book_name = w.book_name

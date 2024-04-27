@@ -4,7 +4,7 @@ from pathlib import Path
 import networkx as nx
 import pandas as pd
 from pyvis.network import Network
-from book_processing.relationship_creator import get_network_df
+from nlp_processing.relationship_creator import get_network_df
 import community as community_louvain
 
 from path_reference.folder_reference import get_book_graphs_path

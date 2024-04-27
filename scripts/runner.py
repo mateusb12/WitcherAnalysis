@@ -1,19 +1,19 @@
 import pandas as pd
 
-from book_processing.entity_extractor import BookAnalyser
-from book_processing.entity_filter import EntityFilter
-from book_processing.relationship_creator import RelationshipCreator
+from nlp_processing.entity_extractor import EntityExtractor
+from nlp_processing.entity_filter import EntityFilter
+from nlp_processing.relationship_creator import RelationshipCreator
 from witcher_network.node_plot import NodePlot
 
 
-class Wrapper:
+class Runner:
     def __init__(self, series: str = "witcher"):
         """This class is the heart of the project. This class
         → 1. Reads the books and creates the entity dataframe
         → 2. Filters the entity dataframe, only including character entities
         → 3. Creates the network dataframe, stating who is connected to who
         → 4. Creates the network plot, storing the network in a .html file"""
-        self.book_analyser = BookAnalyser()
+        self.book_analyser = EntityExtractor()
         self.book_analyser.set_new_series(series)
         self.entity_filter = EntityFilter(series=series)
         self.relationship_creator = RelationshipCreator()
@@ -24,11 +24,11 @@ class Wrapper:
     def set_book(self, book_number: int):
         self.book_analyser.select_book(book_number)
         self.book_number = book_number
-        self.book_name = self.book_analyser.book_dict[self.book_number]
+        self.book_name = self.book_analyser.book_names_dict[self.book_number]
 
     def book_pipeline(self) -> pd.DataFrame:
         print("Entity dataframe analysis")
-        entity_df = self.book_analyser.get_book_entity_df()
+        entity_df = self.book_analyser.get_book_entity_table()
         self.entity_filter.set_entity_df(entity_df)
         print("Creating filtered dataframe")
         filtered_df = self.entity_filter.export_filtered_dataframe()
@@ -48,10 +48,10 @@ class Wrapper:
 
 
 def __main():
-    w = Wrapper("harry_potter")
-    w.set_book(4)
-    w.book_pipeline()
-    w.plot()
+    r = Runner("witcher")
+    r.set_book(4)
+    r.book_pipeline()
+    r.plot()
     print("wow")
 
 

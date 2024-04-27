@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from book_processing.entity_extractor import BookAnalyser
-from book_processing.entity_filter import EntityFilter, get_witcher_filtered_df
+from nlp_processing.entity_extractor import EntityExtractor
+from nlp_processing.entity_filter import EntityFilter, get_witcher_filtered_df
 
 
 class RelationshipCreator:
