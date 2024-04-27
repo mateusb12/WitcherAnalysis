@@ -1,0 +1,202 @@
+diff --git a/nlp_processing/entity_extractor.py b/nlp_processing/entity_extractor.py
+index 248de14..2af22db 100644
+--- a/nlp_processing/entity_extractor.py
++++ b/nlp_processing/entity_extractor.py
+@@ -4,22 +4,17 @@ from pathlib import Path
+ from typing import Optional
+ 
+ import pandas as pd
+-import spacy
+ from spacy import displacy
+-from spacy.lang import en as english
+ from spacy.tokens import Doc
+ 
++from nlp_processing.model_loader import load_nlp_model
+ from path_reference.folder_reference import get_books_path, get_book_entities_path
+ from utils.folder_utils import handle_new_folder
+ 
+ 
+-def list_all_book_files(input_series: str) -> list[os.DirEntry]:
+-    book_path = get_books_path()
+-    series_book_path = Path(book_path, f"{input_series}_books")
+-    aux = [book for book in os.scandir(series_book_path) if '.txt' in book.name]
+-    aux.insert(0, None)
+-    return aux
+-
++def list_all_book_files(input_series: str) -> list[Path]:
++    book_path = Path(get_books_path(), f"{input_series}_books")
++    return list(book_path.glob('*.txt'))
+ 
+ def get_entities_file_path(input_series: str) -> Path:
+     return Path(get_book_entities_path(), f"{input_series}_books_entities")
+@@ -28,11 +23,10 @@ def get_entities_file_path(input_series: str) -> Path:
+ class EntityExtractor:
+     """This class is used to extract entities from a book.
+      It analyses each book and creates an entities.csv file in the book_entities folder."""
+-    def __init__(self, series: str = "witcher"):
+-        self.series_tag = series
+-        self.nlp: english = spacy.load('en_core_web_sm')
+-        print("NLP model loaded")
+-        self.all_books: list[os.DirEntry] = list_all_book_files(series)
++    def __init__(self, nlp_model, series_tag: str = "witcher"):
++        self.nlp = nlp_model
++        self.series_tag = series_tag
++        self.all_books: list[Path] = list_all_book_files(series_tag)
+         self.current_file: Optional[os.DirEntry] = None
+         self.current_book: Optional[Doc] = None
+         self.book_names_dict = self.get_book_dict()
+@@ -51,11 +45,11 @@ class EntityExtractor:
+         print(f"Selected book → {self.current_file.name}")
+ 
+     def set_book_example(self) -> None:
+-        book: os.DirEntry = self.all_books[1]
++        book: Path = self.all_books[1]
+         self.current_book = self.__apply_nlp(book)
+ 
+-    def __apply_nlp(self, input_book: os.DirEntry) -> Doc:
+-        input_book_location = input_book.path
++    def __apply_nlp(self, input_book: Path) -> Doc:
++        input_book_location = str(input_book)
+         with open(input_book_location, encoding="utf8") as f:
+             book_text = f.read()
+             text_size = len(book_text)
+@@ -85,7 +79,7 @@ class EntityExtractor:
+ 
+     def print_book(self) -> str:
+         book = self.current_book
+-        return spacy.displacy.render(book[:100], style="ent", jupyter=True, minify=True)
++        return displacy.render(book[:100], style="ent", jupyter=True, minify=True)
+ 
+     def __get_book_entities(self) -> pd.DataFrame:
+         entity_pot = []
+@@ -136,7 +130,8 @@ class EntityExtractor:
+ 
+ 
+ def __save_entities_df():
+-    book_analyser = EntityExtractor(series="harry_potter")
++    model = load_nlp_model()
++    book_analyser = EntityExtractor(nlp_model=model, series_tag="harry_potter")
+     book_analyser.select_book(1)
+     aux2 = book_analyser.print_book()
+     aux = book_analyser.get_book_entity_table()
+diff --git a/nlp_processing/model_loader.py b/nlp_processing/model_loader.py
+index e69de29..5c8f07e 100644
+--- a/nlp_processing/model_loader.py
++++ b/nlp_processing/model_loader.py
+@@ -0,0 +1,7 @@
++from spacy.lang import en as english
++from spacy import load
++
++def load_nlp_model() -> english:
++    model = load('en_core_web_sm')
++    print("NLP model loaded")
++    return model
+\ No newline at end of file
+diff --git a/project_utils/commit_changes_generator/commit_changes.diff b/project_utils/commit_changes_generator/commit_changes.diff
+index 7b70d70..e69de29 100644
+--- a/project_utils/commit_changes_generator/commit_changes.diff
++++ b/project_utils/commit_changes_generator/commit_changes.diff
+@@ -1,95 +0,0 @@
+-diff --git a/source/database/populate/populator.py b/source/database/populate/populator.py
+-index 321c4b5..2587310 100644
+---- a/source/database/populate/populator.py
+-+++ b/source/database/populate/populator.py
+-@@ -81,13 +81,13 @@ def populate_products():
+- 
+- 
+- def populate_pipeline():
+-+    populate_companies()
+-     system_user = populate_system_user()
+-     populate_single_chat(chat_id=1, system_user_id=system_user.id)
+-     populate_single_chat(chat_id=2, system_user_id=system_user.id)
+-     populate_single_chat(chat_id=3, system_user_id=system_user.id)
+-     populate_secondary_system_user()
+-     populate_single_customer_user(username="test_user", whatsapp_number="5511987654321")
+--    populate_companies()
+-     populate_products()
+-     print("Database populated!")
+- 
+-diff --git a/source/models/database_entities/system_entities/company_model.py b/source/models/database_entities/system_entities/company_model.py
+-index 7fc1d82..24dd6bb 100644
+---- a/source/models/database_entities/system_entities/company_model.py
+-+++ b/source/models/database_entities/system_entities/company_model.py
+-@@ -3,7 +3,7 @@ from factory.package_instances import db_instance as db
+- 
+- 
+- class Company(db.Model):
+--    __tablename__ = 'company'
+-+    __tablename__ = 'Company'
+-     id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+-     name: str = db.Column(db.String(255), nullable=False)
+- 
+-diff --git a/source/models/database_entities/system_entities/system_user_model.py b/source/models/database_entities/system_entities/system_user_model.py
+-index 1cec114..1d7d72f 100644
+---- a/source/models/database_entities/system_entities/system_user_model.py
+-+++ b/source/models/database_entities/system_entities/system_user_model.py
+-@@ -12,19 +12,21 @@ class SystemUser(db.Model):
+-     email = db.Column(db.String(120), unique=True, nullable=False)
+-     password_hash = db.Column(db.String(255), nullable=False)
+- 
+--    # chats = db.relationship('Chat', backref='user', foreign_keys=[Chat.user_id])
+-+    company_id = db.Column(db.Integer, db.ForeignKey('Company.id'))
+- 
+--    def __init__(self, email: str, username: str):
+-+    def __init__(self, email: str, username: str, company_id: int = 1):
+-         self.email = email
+-         self.username = username
+-+        self.company_id = company_id
+- 
+-     def __repr__(self):
+--        return f"<User [{self.email}], [{self.username}]>"
+-+        return f"<User [{self.email}], [{self.username}, [Company#{self.company_id}]>"
+- 
+-     def __iter__(self):
+-         yield 'id', self.id
+-         yield 'email', self.email
+-         yield 'username', self.username
+-+        yield 'company_id', self.company_id
+- 
+-     def set_password(self, password):
+-         self.password_hash = generate_password_hash(password)
+-diff --git a/source/security/auth_endpoints.py b/source/security/auth_endpoints.py
+-index 7f13963..0b84daa 100644
+---- a/source/security/auth_endpoints.py
+-+++ b/source/security/auth_endpoints.py
+-@@ -40,6 +40,7 @@ def register_user():
+-     except UnsupportedMediaType as e:
+-         return jsonify({'error': 'Invalid or missing JSON body', 'details': str(e)}), 400
+-     company_result: Company = company_service.create_company_service(data)
+-+    data["companyId"] = company_result.id
+-     user_result: SystemUser = system_user_service.register_user_service(data)
+-     result = {'user': dict(user_result), 'company': dict(company_result)}
+-     return jsonify({'message': 'User created!', 'data': result}), 201
+-diff --git a/source/service/system_user_service.py b/source/service/system_user_service.py
+-index bd0aa6f..56f8e08 100644
+---- a/source/service/system_user_service.py
+-+++ b/source/service/system_user_service.py
+-@@ -29,7 +29,8 @@ class SystemUserService:
+-             raise EntityAlreadyExistsException(entity_tag="Email", entity=email)
+-         if self.system_user_repository.get_user_by_username(username):
+-             raise EntityAlreadyExistsException(entity_tag="Username", entity=username)
+--        user_object = SystemUser(email=email, username=username)
+-+        companyId = data.get('companyId')
+-+        user_object = SystemUser(email=email, username=username, company_id=companyId)
+-         user_object.set_password(password)
+-         return self.system_user_repository.create_user(user_object)
+- 
+- 
+-Can you please summarize the diff above into the following snippet format?      
+-```commit title 
+-  - commit key point 1 
+-  - commit key point 2 
+-  - commit key point 3 
+-``` 
+-Please do not use camel case for the title. 
+ 
+Can you please summarize the diff above into the following snippet format?      
+```commit title 
+  - commit key point 1 
+  - commit key point 2 
+  - commit key point 3 
+``` 
+Please do not use camel case for the title. 

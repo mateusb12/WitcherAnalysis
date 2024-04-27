@@ -4,22 +4,17 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-import spacy
 from spacy import displacy
-from spacy.lang import en as english
 from spacy.tokens import Doc
 
+from nlp_processing.model_loader import load_nlp_model
 from path_reference.folder_reference import get_books_path, get_book_entities_path
 from utils.folder_utils import handle_new_folder
 
 
-def list_all_book_files(input_series: str) -> list[os.DirEntry]:
-    book_path = get_books_path()
-    series_book_path = Path(book_path, f"{input_series}_books")
-    aux = [book for book in os.scandir(series_book_path) if '.txt' in book.name]
-    aux.insert(0, None)
-    return aux
-
+def list_all_book_files(input_series: str) -> list[Path]:
+    book_path = Path(get_books_path(), f"{input_series}_books")
+    return list(book_path.glob('*.txt'))
 
 def get_entities_file_path(input_series: str) -> Path:
     return Path(get_book_entities_path(), f"{input_series}_books_entities")
@@ -28,11 +23,10 @@ def get_entities_file_path(input_series: str) -> Path:
 class EntityExtractor:
     """This class is used to extract entities from a book.
      It analyses each book and creates an entities.csv file in the book_entities folder."""
-    def __init__(self, series: str = "witcher"):
-        self.series_tag = series
-        self.nlp: english = spacy.load('en_core_web_sm')
-        print("NLP model loaded")
-        self.all_books: list[os.DirEntry] = list_all_book_files(series)
+    def __init__(self, nlp_model, series_tag: str = "witcher"):
+        self.nlp = nlp_model
+        self.series_tag = series_tag
+        self.all_books: list[Path] = list_all_book_files(series_tag)
         self.current_file: Optional[os.DirEntry] = None
         self.current_book: Optional[Doc] = None
         self.book_names_dict = self.get_book_dict()
@@ -51,11 +45,11 @@ class EntityExtractor:
         print(f"Selected book → {self.current_file.name}")
 
     def set_book_example(self) -> None:
-        book: os.DirEntry = self.all_books[1]
+        book: Path = self.all_books[1]
         self.current_book = self.__apply_nlp(book)
 
-    def __apply_nlp(self, input_book: os.DirEntry) -> Doc:
-        input_book_location = input_book.path
+    def __apply_nlp(self, input_book: Path) -> Doc:
+        input_book_location = str(input_book)
         with open(input_book_location, encoding="utf8") as f:
             book_text = f.read()
             text_size = len(book_text)
@@ -85,7 +79,7 @@ class EntityExtractor:
 
     def print_book(self) -> str:
         book = self.current_book
-        return spacy.displacy.render(book[:100], style="ent", jupyter=True, minify=True)
+        return displacy.render(book[:100], style="ent", jupyter=True, minify=True)
 
     def __get_book_entities(self) -> pd.DataFrame:
         entity_pot = []
@@ -136,7 +130,8 @@ class EntityExtractor:
 
 
 def __save_entities_df():
-    book_analyser = EntityExtractor(series="harry_potter")
+    model = load_nlp_model()
+    book_analyser = EntityExtractor(nlp_model=model, series_tag="harry_potter")
     book_analyser.select_book(1)
     aux2 = book_analyser.print_book()
     aux = book_analyser.get_book_entity_table()
