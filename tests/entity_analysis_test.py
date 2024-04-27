@@ -23,13 +23,13 @@ class TestBookAnalyser(unittest.TestCase):
 
     def test_get_book_dict(self):
         # Test that get_book_dict() returns the correct book dictionary
-        self.assertEqual(self.analyser.get_book_dict(), {1: "1 The Philosopher's Stone",
-                                                         2: "2 The Chamber of Secrets",
-                                                         3: "3 The Prisoner of Azkaban",
-                                                         4: "4 The Goblet of Fire",
-                                                         5: "5 The Order of the Phoenix",
-                                                         6: "6 The Half Blood Prince",
-                                                         7: "7 The Deathly Hallows"})
+        self.assertEqual(self.analyser.generate_book_dict(), {1: "1 The Philosopher's Stone",
+                                                              2: "2 The Chamber of Secrets",
+                                                              3: "3 The Prisoner of Azkaban",
+                                                              4: "4 The Goblet of Fire",
+                                                              5: "5 The Order of the Phoenix",
+                                                              6: "6 The Half Blood Prince",
+                                                              7: "7 The Deathly Hallows"})
 
     def test_set_book_example(self):
         # Test that set_book_example() correctly sets the current_book attribute

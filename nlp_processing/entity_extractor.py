@@ -8,17 +8,11 @@ from spacy import displacy
 from spacy.tokens import Doc
 
 from nlp_processing.model_loader import load_nlp_model
-from path_reference.folder_reference import get_books_path, get_book_entities_path
+from utils.entity_utils import list_all_book_files, get_entities_file_path, extract_entities, print_progress
 from utils.folder_utils import handle_new_folder
 
-
-def list_all_book_files(input_series: str) -> list[Path]:
-    book_path = Path(get_books_path(), f"{input_series}_books")
-    return list(book_path.glob('*.txt'))
-
-def get_entities_file_path(input_series: str) -> Path:
-    return Path(get_book_entities_path(), f"{input_series}_books_entities")
-
+CHUNK_SIZE = 500000
+TEXT_SIZE = 1000000
 
 class EntityExtractor:
     """This class is used to extract entities from a book.
@@ -29,14 +23,14 @@ class EntityExtractor:
         self.all_books: list[Path] = list_all_book_files(series_tag)
         self.current_file: Optional[os.DirEntry] = None
         self.current_book: Optional[Doc] = None
-        self.book_names_dict = self.get_book_dict()
+        self.book_names_dict = self.generate_book_dict()
 
     def set_new_series(self, input_series: str):
         self.series_tag = input_series
         self.all_books = list_all_book_files(input_series)
-        self.book_names_dict = self.get_book_dict()
+        self.book_names_dict = self.generate_book_dict()
 
-    def get_book_dict(self) -> dict:
+    def generate_book_dict(self) -> dict:
         return {index: book.name.split('.')[0] for index, book in enumerate(self.all_books) if index != 0}
 
     def select_book(self, book_index: int) -> None:
@@ -53,7 +47,7 @@ class EntityExtractor:
         with open(input_book_location, encoding="utf8") as f:
             book_text = f.read()
             text_size = len(book_text)
-            if text_size <= 1000000:
+            if text_size <= TEXT_SIZE:
                 return self.nlp(book_text)
             print("Big file detected. Splitting...")
             return self.__handle_big_file(book_text)
@@ -65,7 +59,7 @@ class EntityExtractor:
         self.nlp.disable_pipes()
         self.nlp.add_pipe("sentencizer")
         self.nlp.enable_pipe("sentencizer")
-        chunk_size = 500000
+        chunk_size = CHUNK_SIZE
         print("[Big file analysis]   Getting text chunks (1/3)")
         text_chunks = [file_content[i:i + chunk_size] for i in range(0, len(file_content), chunk_size)]
         doc_list = list(self.nlp.pipe(text_chunks))
@@ -87,20 +81,10 @@ class EntityExtractor:
         time_start = time.time()
 
         for index, sentence in enumerate(self.current_book.sents):
-            percentage = round((index / size) * 100, 2)
-            time_elapsed_seconds = round(time.time() - time_start, 2)
-            speed = index / time_elapsed_seconds if time_elapsed_seconds != 0 else 1
-            remaining_sentences = size - index
-            remaining_seconds = round(remaining_sentences / speed, 2) if speed != 0 else 0
-            eta = time_start + remaining_seconds
-            eta_str = time.strftime("%H:%M:%S", time.localtime(eta))
-            if index % 10 == 0:
-                print(f"Processing sentence {index} of {size} ({percentage}%), speed: {round(speed, 2)} sentences/s,"
-                      f"ETA {eta_str}")
-            entities = [entity.text for entity in sentence.ents]
-            if entity_list := entities:
-                entrance = {"sentence": sentence, "entities": entity_list}
-                entity_pot.append(entrance)
+            print_progress(index, size, time_start)
+            entity_list = extract_entities(sentence)
+            if entity_list:
+                entity_pot.append({"sentence": sentence, "entities": entity_list})
         return pd.DataFrame(entity_pot)
 
 
