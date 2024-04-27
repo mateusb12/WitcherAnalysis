@@ -7,9 +7,9 @@ import pandas as pd
 from spacy import displacy
 from spacy.tokens import Doc
 
-from nlp_processing.model_loader import load_nlp_model
-from utils.entity_utils import list_all_book_files, get_entities_file_path, extract_entities, print_progress
-from utils.folder_utils import handle_new_folder
+from source.nlp_processing.model_loader import load_nlp_model
+from source.utils.entity_utils import list_all_book_files, extract_entities, print_progress, get_entities_file_path
+from source.utils.folder_utils import handle_new_folder
 
 CHUNK_SIZE = 500000
 TEXT_SIZE = 1000000

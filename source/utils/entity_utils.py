@@ -1,7 +1,7 @@
 import time
 from pathlib import Path
 
-from path_reference.folder_reference import get_books_path, get_book_entities_path
+from source.path_reference.folder_reference import get_books_path, get_book_entities_path
 
 
 def list_all_book_files(input_series: str) -> list[Path]:
