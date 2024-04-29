@@ -74,7 +74,7 @@ class BookSelector:
     def execute_query_button(self):
         raw_series = self.first_dropdown_selected_option.get()
         chosen_series = raw_series.lower().replace(" books", "").replace(" ", "_" if " " in raw_series else "")
-        self.wrapper.book_analyser.set_new_series(chosen_series)
+        self.wrapper.book_analyser.set_series(chosen_series)
         chosen_book = self.second_dropdown_selected_option.get()
         book_match = re.match(r"\d+", chosen_book)
         if not book_match:

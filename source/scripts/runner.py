@@ -14,7 +14,7 @@ class Runner:
         → 3. Creates the network dataframe, stating who is connected to who
         → 4. Creates the network plot, storing the network in a .html file"""
         self.book_analyser = EntityExtractor()
-        self.book_analyser.set_new_series(series)
+        self.book_analyser.set_series(series)
         self.entity_filter = EntityFilter(series=series)
         self.relationship_creator = RelationshipCreator()
         self.node_plot = NodePlot()

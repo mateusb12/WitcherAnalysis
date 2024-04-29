@@ -6,3 +6,4 @@ jupyter_notebooks/witcher.html
 scripts/witcher.html
 /.env
 /project_utils/commit_changes_generator/commit_changes.diff
+/source/data/cache/*.bin

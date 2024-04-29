@@ -14,7 +14,7 @@ class TestBookAnalyser(unittest.TestCase):
 
     def test_set_new_series(self):
         # Test that set_new_series() correctly sets the series_tag and all_books attributes
-        self.analyser.set_new_series("harry_potter")
+        self.analyser.set_series("harry_potter")
         self.assertEqual(self.analyser.series_tag, "harry_potter")
         books_path = get_books_path()
         books_folder = os.listdir(Path(books_path, "harry_potter_books"))

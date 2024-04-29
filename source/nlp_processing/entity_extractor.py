@@ -8,11 +8,13 @@ from spacy import displacy
 from spacy.tokens import Doc
 
 from source.nlp_processing.model_loader import load_nlp_model
-from source.utils.entity_utils import list_all_book_files, extract_entities, print_progress, get_entities_file_path
+from source.utils.entity_utils import list_all_book_files, extract_entities, print_progress, get_entities_file_path, \
+    cache_file_exists, save_cache_file
 from source.utils.folder_utils import handle_new_folder
 
 CHUNK_SIZE = 500000
 TEXT_SIZE = 1000000
+
 
 class EntityExtractor:
     """This class is used to extract entities from a book.
@@ -25,7 +27,7 @@ class EntityExtractor:
         self.current_book: Optional[Doc] = None
         self.book_names_dict = self.generate_book_dict()
 
-    def set_new_series(self, input_series: str):
+    def set_series(self, input_series: str):
         self.series_tag = input_series
         self.all_books = list_all_book_files(input_series)
         self.book_names_dict = self.generate_book_dict()
@@ -35,24 +37,40 @@ class EntityExtractor:
 
     def select_book(self, book_index: int) -> None:
         self.current_file = self.all_books[book_index]
-        self.current_book = self.__apply_nlp(self.current_file)
+        self.current_book = self.__analyze_book(self.current_file)
         print(f"Selected book → {self.current_file.name}")
 
     def set_book_example(self) -> None:
         book: Path = self.all_books[1]
-        self.current_book = self.__apply_nlp(book)
+        self.current_book = self.__analyze_book(book)
 
-    def __apply_nlp(self, input_book: Path) -> Doc:
-        input_book_location = str(input_book)
-        with open(input_book_location, encoding="utf8") as f:
-            book_text = f.read()
-            text_size = len(book_text)
-            if text_size <= TEXT_SIZE:
-                return self.nlp(book_text)
+    def load_cache_file_content(self, file_location: Path):
+        with open(file_location, "rb") as f:
+            return Doc(self.nlp.vocab).from_bytes(f.read())
+
+    def __analyze_book(self, input_book: Path) -> Doc:
+        if cache_file_exists(input_book):
+            return self.load_cache_file_content(input_book)
+
+        with open(input_book, encoding="utf8") as f:
+            print(f'Cache file not found. Processing [{input_book.name}]')
+            nlp_start = time.time()
+            doc = self.__apply_nlp_to_book(f)
+        save_cache_file(input_book, doc)
+        print(f"Book processed in {round(time.time() - nlp_start, 2)} seconds")
+        return doc
+
+    def __apply_nlp_to_book(self, f):
+        book_text = f.read()
+        text_size = len(book_text)
+        if text_size <= TEXT_SIZE:
+            doc = self.nlp(book_text)
+        else:
             print("Big file detected. Splitting...")
-            return self.__handle_big_file(book_text)
+            doc = self.__process_large_file(book_text)
+        return doc
 
-    def __handle_big_file(self, file_content: str) -> Doc:
+    def __process_large_file(self, file_content: str) -> Doc:
         """Natural language processing modules cannot handle strings over than 1 million characters.
          This function splits the large file into smaller chunks and applies nlp to each chunk.
          Then it merges everything into a single Doc structure"""
@@ -75,7 +93,7 @@ class EntityExtractor:
         book = self.current_book
         return displacy.render(book[:100], style="ent", jupyter=True, minify=True)
 
-    def __get_book_entities(self) -> pd.DataFrame:
+    def __extract_book_entities(self) -> pd.DataFrame:
         entity_pot = []
         size = len(list(self.current_book.sents))
         time_start = time.time()
@@ -87,9 +105,9 @@ class EntityExtractor:
                 entity_pot.append({"sentence": sentence, "entities": entity_list})
         return pd.DataFrame(entity_pot)
 
-
     def get_book_entity_table(self) -> pd.DataFrame:
         if not self.__existing_entity_file():
+            print("File not found")
             return self._create_new_book_entity_table()
         return self._read_existing_book_entity_table()
 
@@ -101,7 +119,7 @@ class EntityExtractor:
 
     def _create_new_book_entity_table(self) -> pd.DataFrame:
         print("Book entity not found. Processing a new one...")
-        book_entities: pd.DataFrame = self.__get_book_entities()
+        book_entities: pd.DataFrame = self.__extract_book_entities()
         output_location = Path(get_entities_file_path(self.series_tag), f"{self.__get_file_tag()}")
         handle_new_folder(output_location)
         book_entities.to_csv(output_location, index=False)

@@ -42,3 +42,7 @@ def get_wrapper_path():
 
 def get_book_graphs_path():
     return Path(get_wrapper_path(), 'book_graphs')
+
+
+def get_cache_path() -> Path:
+    return Path(get_data_path(), 'cache')

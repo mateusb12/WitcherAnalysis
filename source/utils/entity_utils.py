@@ -1,7 +1,10 @@
+import os
 import time
 from pathlib import Path
 
-from source.path_reference.folder_reference import get_books_path, get_book_entities_path
+from spacy.tokens import Doc
+
+from source.path_reference.folder_reference import get_books_path, get_book_entities_path, get_cache_path
 
 
 def list_all_book_files(input_series: str) -> list[Path]:
@@ -15,6 +18,19 @@ def get_entities_file_path(input_series: str) -> Path:
 
 def extract_entities(sentence):
     return [entity.text for entity in sentence.ents]
+
+
+def cache_file_exists(file_location: Path) -> bool:
+    book_name = file_location.name.split('.')[0]
+    cache_path = Path(get_cache_path(), f"{book_name}.bin")
+    return cache_path.exists()
+
+
+def save_cache_file(file_location: Path, doc: Doc):
+    book_name = file_location.name.split('.')[0]
+    cache_file_location = Path(get_cache_path(), f"{book_name}.bin")
+    with open(cache_file_location, "wb") as f:
+        f.write(doc.to_bytes())
 
 
 def print_progress(index, size, time_start):
