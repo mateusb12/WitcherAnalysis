@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from pathlib import Path
@@ -29,8 +30,7 @@ def cache_file_exists(file_location: Path) -> bool:
 def save_cache_file(file_location: Path, doc: Doc):
     book_name = file_location.name.split('.')[0]
     cache_file_location = Path(get_cache_path(), f"{book_name}.bin")
-    with open(cache_file_location, "wb") as f:
-        f.write(doc.to_bytes())
+    doc.to_disk(cache_file_location)
 
 
 def print_progress(index, size, time_start):

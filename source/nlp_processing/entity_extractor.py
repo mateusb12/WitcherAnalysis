@@ -8,19 +8,18 @@ from spacy import displacy
 from spacy.tokens import Doc
 
 from source.nlp_processing.model_loader import load_nlp_model
+from source.nlp_processing.text_processor import TextProcessor
 from source.utils.entity_utils import list_all_book_files, extract_entities, print_progress, get_entities_file_path, \
     cache_file_exists, save_cache_file
 from source.utils.folder_utils import handle_new_folder
-
-CHUNK_SIZE = 500000
-TEXT_SIZE = 1000000
 
 
 class EntityExtractor:
     """This class is used to extract entities from a book.
      It analyses each book and creates an entities.csv file in the book_entities folder."""
+
     def __init__(self, nlp_model, series_tag: str = "witcher"):
-        self.nlp = nlp_model
+        self.text_processor = TextProcessor(nlp_model)
         self.series_tag = series_tag
         self.all_books: list[Path] = list_all_book_files(series_tag)
         self.current_file: Optional[os.DirEntry] = None
@@ -37,57 +36,12 @@ class EntityExtractor:
 
     def select_book(self, book_index: int) -> None:
         self.current_file = self.all_books[book_index]
-        self.current_book = self.__analyze_book(self.current_file)
+        self.current_book = self.text_processor.analyze_book(self.current_file)
         print(f"Selected book → {self.current_file.name}")
 
     def set_book_example(self) -> None:
         book: Path = self.all_books[1]
-        self.current_book = self.__analyze_book(book)
-
-    def load_cache_file_content(self, file_location: Path):
-        with open(file_location, "rb") as f:
-            return Doc(self.nlp.vocab).from_bytes(f.read())
-
-    def __analyze_book(self, input_book: Path) -> Doc:
-        if cache_file_exists(input_book):
-            return self.load_cache_file_content(input_book)
-
-        with open(input_book, encoding="utf8") as f:
-            print(f'Cache file not found. Processing [{input_book.name}]')
-            nlp_start = time.time()
-            doc = self.__apply_nlp_to_book(f)
-        save_cache_file(input_book, doc)
-        print(f"Book processed in {round(time.time() - nlp_start, 2)} seconds")
-        return doc
-
-    def __apply_nlp_to_book(self, f):
-        book_text = f.read()
-        text_size = len(book_text)
-        if text_size <= TEXT_SIZE:
-            doc = self.nlp(book_text)
-        else:
-            print("Big file detected. Splitting...")
-            doc = self.__process_large_file(book_text)
-        return doc
-
-    def __process_large_file(self, file_content: str) -> Doc:
-        """Natural language processing modules cannot handle strings over than 1 million characters.
-         This function splits the large file into smaller chunks and applies nlp to each chunk.
-         Then it merges everything into a single Doc structure"""
-        self.nlp.disable_pipes()
-        self.nlp.add_pipe("sentencizer")
-        self.nlp.enable_pipe("sentencizer")
-        chunk_size = CHUNK_SIZE
-        print("[Big file analysis]   Getting text chunks (1/3)")
-        text_chunks = [file_content[i:i + chunk_size] for i in range(0, len(file_content), chunk_size)]
-        doc_list = list(self.nlp.pipe(text_chunks))
-        print("[Big file analysis]   Generating single doc (2/3)")
-        single_doc = Doc(self.nlp.vocab, words=[token.text for doc in doc_list for token in doc])
-        print("[Big file analysis]   Analysing single doc (3/3)")
-        for i, token in enumerate(single_doc):
-            if token.text.startswith(".") or token.text.startswith("!") or token.text.startswith("?"):
-                single_doc[i].is_sent_start = True
-        return single_doc
+        self.current_book = self.text_processor.analyze_book(book)
 
     def print_book(self) -> str:
         book = self.current_book
