@@ -1,5 +1,5 @@
-webscrapping/geckodriver.exe
-webscrapping/geckodriver.log
+source/webscrapping/geckodriver.exe
+source/webscrapping/geckodriver.log
 jupyter_notebooks/geckodriver.log
 jupyter_notebooks/geckodriver.exe
 jupyter_notebooks/witcher.html
