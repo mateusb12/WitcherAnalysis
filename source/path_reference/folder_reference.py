@@ -36,12 +36,12 @@ def get_driver_path() -> Path:
     return get_webscrapping_path() / 'geckodriver.exe'
 
 
-def get_wrapper_path():
-    return Path(ref, 'wrap')
+def get_runner_path():
+    return Path(ref, 'scripts')
 
 
 def get_book_graphs_path():
-    return Path(get_wrapper_path(), 'book_graphs')
+    return Path(get_runner_path(), 'book_graphs')
 
 
 def get_cache_path() -> Path:

@@ -4,10 +4,11 @@ from pathlib import Path
 import networkx as nx
 import pandas as pd
 from pyvis.network import Network
-from nlp_processing.relationship_creator import get_network_df
 import community as community_louvain
 
-from path_reference.folder_reference import get_book_graphs_path
+from source.nlp_processing.entity_filter import get_witcher_filtered_df
+from source.nlp_processing.relationship_creator import get_network_df
+from source.path_reference.folder_reference import get_book_graphs_path
 
 
 class Centrality(enum.Enum):
@@ -28,6 +29,8 @@ class NodePlot:
 
     def set_network_df(self, input_df: pd.DataFrame):
         self.network_df = input_df
+        if 'value' not in self.network_df.columns:
+            raise ValueError("The input dataframe must contain a 'value' column")
         self.G = nx.from_pandas_edgelist(self.network_df, source="source", target="target", edge_attr="value",
                                          create_using=nx.Graph())
 
@@ -57,7 +60,7 @@ class NodePlot:
         self.net = Network(notebook=False, width="2000px", height="1400px", bgcolor="#222222", font_color="white")
         self.net.from_nx(self.G)
         book_path = Path(get_book_graphs_path(), f"{book_name}.html")
-        self.net.show(str(book_path))
+        self.net.show(str(book_path), notebook=False)
 
     def get_centrality(self, input_type: Centrality = Centrality.degree) -> dict or None:
         if input_type == Centrality.degree:
@@ -72,6 +75,8 @@ class NodePlot:
 
 def __main():
     npl = NodePlot()
+    df = get_network_df()
+    npl.set_network_df(df)
     npl.plot()
 
 

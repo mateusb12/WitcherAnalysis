@@ -3,26 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from source.path_reference.folder_reference import get_data_path, get_books_path, get_books_entities_path
-
-
-def __cast_to_str(list_obj: list) -> str:
-    return str(list_obj)
-
-
-def __convert_to_list(input_str: str) -> list[str]:
-    if isinstance(input_str, list):
-        input_str = __cast_to_str(input_str)
-    forbidden_characters = ["[", "'", "]"]
-    for c in forbidden_characters:
-        input_str = input_str.replace(c, "")
-    return input_str.split(", ")
-
-
-def _filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
-    entity_pot = __convert_to_list(entity_list)
-    full_names = characters_df["character"].tolist()
-    first_names = characters_df["character_first_name"].tolist()
-    return [x for x in entity_pot if x in first_names or x in full_names]
+from source.utils.entity_utils import filter_entity_df
 
 
 class EntityFilter:
@@ -43,7 +24,7 @@ class EntityFilter:
 
     def __filter_character_only_entities(self) -> None:
         self.entity_df["character_entities"] = self.entity_df["entities"].apply(
-            lambda x: _filter_entity_df(x, self.characters_df))
+            lambda x: filter_entity_df(x, self.characters_df))
 
     def __filter_empty_entities(self) -> None:
         self.entity_df = self.entity_df[self.entity_df["character_entities"].map(len) > 0]

@@ -1,8 +1,10 @@
 import pandas as pd
 
-from nlp_processing.entity_extractor import EntityExtractor
-from nlp_processing.entity_filter import EntityFilter
-from nlp_processing.relationship_creator import RelationshipCreator
+from source.nlp_processing.entity_analysis.book_manager import BookManager
+from source.nlp_processing.entity_analysis.entity_extractor import EntityExtractor
+from source.nlp_processing.entity_filter import EntityFilter
+from source.nlp_processing.model_loader import load_nlp_model
+from source.nlp_processing.relationship_creator import RelationshipCreator
 from witcher_network.node_plot import NodePlot
 
 
@@ -13,13 +15,16 @@ class Runner:
         → 2. Filters the entity dataframe, only including character entities
         → 3. Creates the network dataframe, stating who is connected to who
         → 4. Creates the network plot, storing the network in a .html file"""
-        self.book_analyser = EntityExtractor()
+        print("Initializing runner...")
+        nlp_model = load_nlp_model()
+        self.book_analyser = BookManager(nlp_model)
         self.book_analyser.set_series(series)
         self.entity_filter = EntityFilter(series=series)
         self.relationship_creator = RelationshipCreator()
         self.node_plot = NodePlot()
         self.book_number: int = 0
         self.book_name = ""
+        print("Runner initialized!")
 
     def set_book(self, book_number: int):
         self.book_analyser.select_book(book_number)
@@ -28,7 +33,7 @@ class Runner:
 
     def book_pipeline(self) -> pd.DataFrame:
         print("Entity dataframe analysis")
-        entity_df = self.book_analyser.get_book_entity_table()
+        entity_df = self.book_analyser.get_book_entities()
         self.entity_filter.set_entity_df(entity_df)
         print("Creating filtered dataframe")
         filtered_df = self.entity_filter.export_filtered_dataframe()

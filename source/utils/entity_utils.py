@@ -3,6 +3,7 @@ import os
 import time
 from pathlib import Path
 
+import pandas as pd
 from spacy.tokens import Doc
 
 from source.path_reference.folder_reference import get_books_path, get_book_entities_path, get_cache_path
@@ -44,3 +45,23 @@ def print_progress(index, size, time_start):
     if index % 10 == 0:
         print(
             f"Processing sentence {index} of {size} ({percentage}%), speed: {round(speed, 2)} sentences/s, ETA {eta_str}")
+
+
+def cast_to_str(list_obj: list) -> str:
+    return str(list_obj)
+
+
+def convert_to_list(input_str: str) -> list[str]:
+    if isinstance(input_str, list):
+        input_str = cast_to_str(input_str)
+    forbidden_characters = ["[", "'", "]"]
+    for c in forbidden_characters:
+        input_str = input_str.replace(c, "")
+    return input_str.split(", ")
+
+
+def filter_entity_df(entity_list: str, characters_df: pd.DataFrame):
+    entity_pot = convert_to_list(entity_list)
+    full_names = characters_df["character"].tolist()
+    first_names = characters_df["character_first_name"].tolist()
+    return [x for x in entity_pot if x in first_names or x in full_names]
