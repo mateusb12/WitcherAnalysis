@@ -5,9 +5,9 @@ from typing import Optional
 from spacy import displacy
 from spacy.tokens import Doc
 
-from source.nlp_processing.entity_extractor import EntityExtractor
+from source.nlp_processing.entity_analysis.entity_extractor import EntityExtractor
+from source.nlp_processing.entity_analysis.text_processor import TextProcessor
 from source.nlp_processing.model_loader import load_nlp_model
-from source.nlp_processing.text_processor import TextProcessor
 from source.utils.entity_utils import list_all_book_files
 
 

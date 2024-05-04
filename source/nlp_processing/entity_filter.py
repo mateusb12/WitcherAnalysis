@@ -2,8 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from path_reference.folder_reference import get_data_path, get_books_entities_path, get_book_characters_path, \
-    get_books_path
+from source.path_reference.folder_reference import get_data_path, get_books_path, get_books_entities_path
 
 
 def __cast_to_str(list_obj: list) -> str:
