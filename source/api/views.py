@@ -1,6 +1,7 @@
 import os
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,6 +10,9 @@ from django.conf import settings
 
 
 class FileUploadView(APIView):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'upload_form.html')
+
     def post(self, request, *args, **kwargs):
         serializer = FileUploadSerializer(data=request.data)
 
@@ -31,3 +35,11 @@ class FileUploadView(APIView):
 def upload_form(request):
     with open(os.path.join(settings.BASE_DIR, 'static', 'upload_form.html'), 'r') as file:
         return HttpResponse(file.read())
+
+
+def home(request):
+    return HttpResponse("Hello, World!")
+
+
+def api_overview(request):
+    return JsonResponse({"message": "API Overview"})
