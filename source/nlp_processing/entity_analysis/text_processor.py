@@ -4,7 +4,7 @@ from pathlib import Path
 
 from spacy.tokens import Doc
 
-from source.path_reference.folder_reference import get_cache_path
+from source.path_reference.folder_reference import get_cache_path, get_nlp_cache_path
 from source.utils.entity_utils import cache_file_exists, save_cache_file
 
 CHUNK_SIZE = 500000
@@ -17,7 +17,7 @@ class TextProcessor:
 
     def load_cache_file_content(self, file_location: Path):
         filename = file_location.name.split('.')[0]
-        cache_file_path = Path(get_cache_path(), f"{filename}.bin")
+        cache_file_path = Path(get_nlp_cache_path(), f"{filename}.bin")
         return Doc(self.nlp.vocab).from_disk(cache_file_path)
 
     def analyze_book(self, input_book: Path) -> Doc:

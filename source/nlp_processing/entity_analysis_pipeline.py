@@ -1,5 +1,8 @@
 import re
 
+import pandas as pd
+
+from source.data.cache.cache_loader import existing_relationship_cache, existing_entity_cache
 from source.nlp_processing.entity_analysis.book_manager import BookManager
 from source.nlp_processing.entity_analysis.entity_extractor import EntityExtractor
 from source.nlp_processing.entity_analysis.entity_filter import EntityFilter
@@ -13,32 +16,35 @@ class BookAnalysisPipeline:
         self.entity_extractor = EntityExtractor()
         self.entity_filter = EntityFilter(series=series_tag)
         self.relationship_creator = RelationshipCreator()
+        self.book_title: str = ""
+        self.book_index: int = 0
 
     def run_pipeline(self, book_index: int):
-        # Select and analyze the book
         book_name = self.book_manager.all_books[book_index].name
-        book_title = re.search(r"\d+\s+(.*?)\.txt", book_name).group(1)
-        print(f"1/5 Analyzing book '{book_title}'")
-        self.book_manager.select_book(book_index)
+        self.book_index = book_index
+        self.book_title = re.search(r"\d+\s+(.*?)\.txt", book_name).group(1)
+        return self.get_relationship_table(self.book_title)
 
-        # Extract entities from the book
-        print("2/5 Extracting entities")
-        entities = self.book_manager.get_book_entities()
-
-        # Set the entities dataframe for filtering
-        print("3/5 Filtering entities")
-        self.entity_filter.set_entity_df(entities)
-
-        # Filter the entities and get the filtered dataframe
-        print("4/5 Creating relationships")
-        character_only_df = self.entity_filter.export_filtered_dataframe()
-
-        # Aggregate the network and get the final dataframe
-        print("5/5 Aggregating network")
+    def get_relationship_table(self, book_title: str) -> pd.DataFrame:
+        existing_cache = existing_relationship_cache(f"{book_title}.csv")
+        if existing_cache:
+            return pd.read_csv(str(existing_cache))
+        print("Relationship table cache not found. Processing it...")
+        character_only_df: pd.DataFrame = self.get_filtered_entities(book_title)
         self.relationship_creator.set_entity_df(character_only_df)
-        network_df = self.relationship_creator.aggregate_network()
-
+        network_df: pd.DataFrame = self.relationship_creator.aggregate_network()
         return network_df
+
+    def get_filtered_entities(self, book_title: str) -> pd.DataFrame:
+        existing_cache = existing_entity_cache(f"{book_title}.csv")
+        if existing_cache:
+            return pd.read_csv(str(existing_cache))
+        print("Entity table cache not found. Processing it...")
+        self.book_manager.select_book(self.book_index)
+        entities: pd.DataFrame = self.book_manager.get_book_entities()
+        self.entity_filter.set_entity_df(entities)
+        character_only_df: pd.DataFrame = self.entity_filter.export_filtered_dataframe()
+        return character_only_df
 
 
 def main():

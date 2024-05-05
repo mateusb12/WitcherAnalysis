@@ -7,4 +7,8 @@ scripts/witcher.html
 /.env
 /project_utils/commit_changes_generator/commit_changes.diff
 /source/data/cache/*.bin
+/source/data/cache/**/*.bin
+/source/data/cache/**/*.csv
 /source/scripts/book_graphs/*.html
+/source/data/books_entities/*.csv
+/source/data/books_entities/**/*.csv

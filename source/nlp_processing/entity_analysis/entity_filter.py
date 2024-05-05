@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from source.path_reference.folder_reference import get_data_path, get_books_path, get_books_entities_path
+from source.path_reference.folder_reference import get_data_path, get_books_path, get_books_entities_path, \
+    get_character_table_path
 from source.utils.entity_utils import filter_entity_df
 
 
@@ -13,7 +14,7 @@ class EntityFilter:
     There are already some examples in the folder, for the series 'The Witcher', 'Harry Potter' and 'Twilight'. """
     def __init__(self, series: str = "witcher"):
         self.entity_df = None
-        character_path = Path(get_data_path(), "books_characters", f"{series}_characters.csv")
+        character_path = Path(get_character_table_path(), f"{series}_characters.csv")
         if existing_file := Path(character_path).is_file():
             self.characters_df = pd.read_csv(character_path)
         else:

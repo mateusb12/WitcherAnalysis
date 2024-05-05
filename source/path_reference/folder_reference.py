@@ -46,3 +46,11 @@ def get_book_graphs_path():
 
 def get_cache_path() -> Path:
     return Path(get_data_path(), 'cache')
+
+
+def get_nlp_cache_path() -> Path:
+    return Path(get_cache_path(), 'nlp_cache')
+
+
+def get_character_table_path() -> Path:
+    return Path(get_data_path(), 'character_table')

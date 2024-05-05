@@ -6,7 +6,8 @@ from pathlib import Path
 import pandas as pd
 from spacy.tokens import Doc
 
-from source.path_reference.folder_reference import get_books_path, get_book_entities_path, get_cache_path
+from source.data.cache.cache_loader import existing_nlp_cache, NLP_CACHE_PATH
+from source.path_reference.folder_reference import get_books_path, get_book_entities_path, get_nlp_cache_path
 
 
 def list_all_book_files(input_series: str) -> list[Path]:
@@ -24,13 +25,13 @@ def extract_entities(sentence):
 
 def cache_file_exists(file_location: Path) -> bool:
     book_name = file_location.name.split('.')[0]
-    cache_path = Path(get_cache_path(), f"{book_name}.bin")
-    return cache_path.exists()
+    filename = f"{book_name}.bin"
+    return existing_nlp_cache(filename)
 
 
 def save_cache_file(file_location: Path, doc: Doc):
     book_name = file_location.name.split('.')[0]
-    cache_file_location = Path(get_cache_path(), f"{book_name}.bin")
+    cache_file_location = Path(NLP_CACHE_PATH, f"{book_name}.bin")
     doc.to_disk(cache_file_location)
 
 
