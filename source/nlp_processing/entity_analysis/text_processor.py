@@ -22,11 +22,11 @@ class TextProcessor:
 
     def analyze_book(self, input_book: Path) -> Doc:
         if cache_file_exists(input_book):
-            print(f'1/3 (NLP processing) → Cache file located. Loading [{input_book.name}]')
+            print(f'- -             Cache file located. Loading [{input_book.name}]')
             return self.load_cache_file_content(input_book)
 
         with open(input_book, encoding="utf8") as f:
-            print(f'1/3 (NLP processing) → Cache file not found. Processing [{input_book.name}]')
+            print(f'- -             Cache file not found. Processing [{input_book.name}]')
             nlp_start = time.time()
             doc = self.__apply_nlp_to_book(f)
         save_cache_file(input_book, doc)

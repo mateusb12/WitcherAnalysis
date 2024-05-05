@@ -30,7 +30,6 @@ class BookManager:
         self.current_file = self.all_books[book_index]
         self.current_book = self.text_processor.analyze_book(self.current_file)
         self.entity_extractor.set_information(book=self.current_book, file=self.current_file, series=self.series_tag)
-        print(f"Selected book → {self.current_file.name}")
 
     def generate_book_dict(self) -> dict:
         return {index: book.name.split('.')[0] for index, book in enumerate(self.all_books) if index != 0}

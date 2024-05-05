@@ -18,7 +18,7 @@ class EntityExtractor:
         self.current_file: Optional[os.DirEntry] = None
         self.series_tag: str = "harry_potter"
 
-    def set_information(self, book: Doc, file: os.DirEntry, series: str):
+    def set_information(self, book: Doc, file: Path, series: str):
         self.current_book = book
         self.current_file = file
         self.series_tag = series
@@ -56,6 +56,6 @@ class EntityExtractor:
         return book_entities
 
     def _read_existing_book_entity_table(self) -> pd.DataFrame:
-        print(f"File [{self.__get_file_tag()}] already exists")
+        print(f"- -             File [{self.__get_file_tag()}] already exists")
         ref = Path(get_entities_file_path(self.series_tag), f"{self.__get_file_tag()}")
         return pd.read_csv(ref)
