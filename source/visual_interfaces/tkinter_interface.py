@@ -3,9 +3,9 @@ import tkinter as tk
 from tkinter import ttk
 from typing import List
 
-from interfaces.utils import get_book_folders, get_book_names
-from scripts.existing_graphs import retrieve_book
-from scripts.wrapper import Runner
+from source.visual_interfaces.utils import get_book_folders, get_book_names
+from source.scripts.existing_graphs import retrieve_book
+from source.scripts.runner import Runner
 
 
 class BookSelector:

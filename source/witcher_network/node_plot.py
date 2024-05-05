@@ -6,8 +6,7 @@ import pandas as pd
 from pyvis.network import Network
 import community as community_louvain
 
-from source.nlp_processing.entity_filter import get_witcher_filtered_df
-from source.nlp_processing.relationship_creator import get_network_df
+from source.nlp_processing.entity_analysis.relationship_creator import get_network_df
 from source.path_reference.folder_reference import get_book_graphs_path
 
 

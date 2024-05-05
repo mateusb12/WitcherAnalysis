@@ -1,6 +1,6 @@
 import pandas as pd
 
-from source.nlp_processing.entity_filter import get_witcher_filtered_df
+from source.nlp_processing.entity_analysis.entity_filter import get_witcher_filtered_df
 from source.utils.relationship_utils import bidirectional_sort, get_source_target_relationship_list, remove_string_duplicates
 
 
