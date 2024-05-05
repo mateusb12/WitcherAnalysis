@@ -33,7 +33,9 @@ class FileUploadView(APIView):
 
 
 def upload_form(request):
-    with open(os.path.join(settings.BASE_DIR, 'static', 'upload_form.html'), 'r') as file:
+    form_location = os.path.join(settings.BASE_DIR, 'static', 'upload_form.html')
+    print(form_location)
+    with open(form_location, 'r') as file:
         return HttpResponse(file.read())
 
 
