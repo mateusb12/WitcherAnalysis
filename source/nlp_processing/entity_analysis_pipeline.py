@@ -44,6 +44,7 @@ class BookAnalysisPipeline:
         entities: pd.DataFrame = self.book_manager.get_book_entities()
         self.entity_filter.set_entity_df(entities)
         character_only_df: pd.DataFrame = self.entity_filter.export_filtered_dataframe()
+        character_only_df.to_csv(str(existing_cache), index=False)
         return character_only_df
 
 
