@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+</head>
+<body>
+    <h1>Welcome to the Home Page</h1>
+    <p>Here are the available endpoints:</p>
+    <ul>
+        {% for endpoint in endpoints %}
+            <li><a href="{{ endpoint }}">{{ endpoint }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

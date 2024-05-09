@@ -2,9 +2,12 @@ import os
 
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.urls import get_resolver
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
+from utils.django_utils import get_all_url_patterns
 from .serializers import FileUploadSerializer
 from django.conf import settings
 
@@ -41,6 +44,12 @@ def upload_form(request):
 
 def home(request):
     return HttpResponse("Hello, World!")
+
+
+def entry_page(request):
+    urlconf = get_all_url_patterns(get_resolver(None).url_patterns)
+    endpoints = [pattern for pattern in urlconf if pattern]
+    return render(request, 'entry_page.html', {'endpoints': endpoints})
 
 
 def api_overview(request):
