@@ -13,7 +13,7 @@ def get_all_url_patterns(urlpatterns, prefix=''):
         elif isinstance(pattern, URLPattern):
             url = prefix + str(pattern.pattern)
             url = url.replace('^', '/').replace('$', '')
-            if len(url.split('/')) == 2 and '(' not in url and ')' not in url:  # if it's a top-level URL and does not contain a regular expression
+            if len(url.split('/')) == 2 and '(' not in url and ')' not in url:
                 urls.append(url)
     return tuple(urls)
 

@@ -22,5 +22,6 @@ from django_layer.api import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('django_layer.api.urls')),
-    path('', views.entry_page, name='entry_page'),  # new
+    path('book_analysis/',  views.upload_form),
+    path('', views.entry_page, name='entry_page')
 ]
