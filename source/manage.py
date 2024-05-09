@@ -4,12 +4,14 @@ import os
 import sys
 from dotenv import load_dotenv
 
+from django_layer.project_config import PROJECT_NAME
+
 load_dotenv()
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_layer.django_books.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'django_layer.{PROJECT_NAME}.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

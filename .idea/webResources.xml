@@ -5,7 +5,7 @@
       <entry url="file://$PROJECT_DIR$">
         <entryData>
           <resourceRoots>
-            <path value="file://$PROJECT_DIR$/source/django_layer/templates" />
+            <path value="file://$PROJECT_DIR$/source/django_layer/static" />
           </resourceRoots>
         </entryData>
       </entry>
