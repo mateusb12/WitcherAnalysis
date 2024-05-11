@@ -7,7 +7,7 @@
         .upload-container {
             border: 2px dashed #ccc;
             border-radius: 10px;
-            width: 80%;
+            width: 20%;
             margin: auto;
             padding: 50px;
             text-align: center;
@@ -16,13 +16,16 @@
             position: relative;
         }
 
+        #drop_zone_txt {
+            margin-bottom: 10px; /* Adjust as needed */
+        }
+
         .upload-icon {
-            background-image: url('icons/submit_txt.png'); /* Adjust path as needed */
-            background-size: contain;
             height: 100px;
             width: 100px;
             margin: auto;
             background-repeat: no-repeat;
+            background-size: contain;
         }
 
         .upload-container:hover {
@@ -33,47 +36,116 @@
         input[type="file"] {
             opacity: 0;
         }
+
+        .file-display-container {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            width: 20%;
+            min-width: 300px; /* Ensures a minimum width for smaller screens */
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
+            color: #50C878;
+            font-family: Arial, sans-serif;
+            position: relative;
+            background-color: #f0f0f0;
+        }
+
+        .file-display-container:hover {
+            background-color: #f9f9f9;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            color: #555;
+        }
+
+        .download-button {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        .download-button:hover {
+            opacity: 0.8; /* Adds a hover effect to the download icon */
+        }
     </style>
 </head>
 <body>
-<div id="drop_zone" class="upload-container">
-    <div class="upload-icon"></div>
+<div id="drop_zone_txt" class="upload-container">
+    <div class="upload-icon" style="background-image: url('icons/submit_txt.png');"></div>
     <p>Click to Upload or drag and drop.</p>
     <p> This is your book .txt file</p>
     <p>(Max. File size: 25 MB)</p>
-    <input type="file" id="file_input" multiple style="display:none;">
+    <input type="file" id="file_input_txt" multiple style="display:none;">
 </div>
+
+<div id="drop_zone_csv" class="upload-container">
+    <div class="upload-icon" style="background-image: url('icons/submit_csv.png');"></div>
+    <p>Click to Upload or drag and drop.</p>
+    <p> This is your data .csv file</p>
+    <p>(Max. File size: 25 MB)</p>
+    <input type="file" id="file_input_csv" multiple style="display:none;">
+</div>
+
+<div class="file-display-container">
+    <img src="icons/txt-file.png" alt="File Icon" style="height: 50px;">
+    <div class="file-description">
+        <h3>HannahBusing_Resume.pdf</h3>
+        <p class="file-info">File size: 200 KB</p>
+    </div>
+    <img src="icons/trash.png" alt="Download" class="download-button" id="trash-icon">
+</div>
+
+
 <script>
-    let dropZone = document.getElementById('drop_zone');
-    let fileInput = document.getElementById('file_input');
+    function setupDragAndDrop(elementId, inputId) {
+        let dropZone = document.getElementById(elementId);
+        let fileInput = document.getElementById(inputId);
 
-    dropZone.addEventListener('click', function () {
-        fileInput.click();
+        dropZone.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        dropZone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
+
+        dropZone.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+        });
+
+        dropZone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            fileInput.files = e.dataTransfer.files;
+            console.log(`${inputId} Files dropped:`, fileInput.files);
+        });
+
+        fileInput.addEventListener('change', function () {
+            console.log(`${inputId} Files selected:`, fileInput.files);
+        });
+    }
+
+    // Setup for both file inputs
+    setupDragAndDrop('drop_zone_txt', 'file_input_txt');
+    setupDragAndDrop('drop_zone_csv', 'file_input_csv');
+
+    let trashIcon = document.getElementById('trash-icon');
+
+    trashIcon.addEventListener('mouseover', function () {
+        trashIcon.src = 'icons/red_trash.png';
     });
 
-    dropZone.addEventListener('dragover', function (e) {
-        e.preventDefault();
-        dropZone.classList.add('active');
-    });
-
-    dropZone.addEventListener('dragleave', function (e) {
-        e.preventDefault();
-        dropZone.classList.remove('active');
-    });
-
-    dropZone.addEventListener('drop', function (e) {
-        e.preventDefault();
-        dropZone.classList.remove('active');
-        fileInput.files = e.dataTransfer.files;
-        // Optionally call a function to handle the file upload process.
-        console.log('Files dropped:', fileInput.files);
-    });
-
-    fileInput.addEventListener('change', function () {
-        console.log('Files selected:', fileInput.files);
+    trashIcon.addEventListener('mouseout', function () {
+        trashIcon.src = 'icons/trash.png';
     });
 </script>
+
 </body>
-
-
 </html>
