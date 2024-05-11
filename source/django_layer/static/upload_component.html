@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Component</title>
+    <style>
+        .upload-container {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            width: 80%;
+            margin: auto;
+            padding: 50px;
+            text-align: center;
+            color: #888;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        .upload-icon {
+            background-image: url('icons/submit_txt.png'); /* Adjust path as needed */
+            background-size: contain;
+            height: 100px;
+            width: 100px;
+            margin: auto;
+            background-repeat: no-repeat;
+        }
+
+        .upload-container:hover {
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="drop_zone" class="upload-container">
+    <div class="upload-icon"></div>
+    <p>Click to Upload or drag and drop.</p>
+    <p> This is your book .txt file</p>
+    <p>(Max. File size: 25 MB)</p>
+    <input type="file" id="file_input" multiple style="display:none;">
+</div>
+<script>
+    let dropZone = document.getElementById('drop_zone');
+    let fileInput = document.getElementById('file_input');
+
+    dropZone.addEventListener('click', function () {
+        fileInput.click();
+    });
+
+    dropZone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        dropZone.classList.add('active');
+    });
+
+    dropZone.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        dropZone.classList.remove('active');
+    });
+
+    dropZone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropZone.classList.remove('active');
+        fileInput.files = e.dataTransfer.files;
+        // Optionally call a function to handle the file upload process.
+        console.log('Files dropped:', fileInput.files);
+    });
+
+    fileInput.addEventListener('change', function () {
+        console.log('Files selected:', fileInput.files);
+    });
+</script>
+</body>
+
+
+</html>
