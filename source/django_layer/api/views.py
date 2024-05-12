@@ -44,9 +44,8 @@ def upload_form(request):
 
 
 @csrf_exempt
-def upload_info(request):
+def upload_books(request):
     if request.method == 'POST':
-        # Retrieve the file information from the AJAX request
         dict_data = request.POST.dict()
         csv_data = {key: value for key, value in dict_data.items() if key.startswith('csv_')}
         txt_data = {key: value for key, value in dict_data.items() if key.startswith('txt_')}
@@ -56,6 +55,7 @@ def upload_info(request):
     else:
         # If the request method is not POST, return an appropriate HTTP response
         return HttpResponse(status=405)
+
 
 def home(request):
     return HttpResponse("Hello, World!")

@@ -33,6 +33,19 @@ class TextProcessor:
         print(f"Book processed in {round(time.time() - nlp_start, 2)} seconds")
         return doc
 
+    def analyze_book_from_text_data(self, text_data: str) -> Doc:
+        """Process text data from a string rather than a file, without involving caching."""
+        print(f'Processing text data directly.')
+        nlp_start = time.time()
+        text_size = len(text_data)
+        if text_size <= TEXT_SIZE:
+            doc = self.nlp(text_data)
+        else:
+            print("Large text detected. Splitting...")
+            doc = self.__process_large_file(text_data)
+        print(f"Text data processed in {round(time.time() - nlp_start, 2)} seconds")
+        return doc
+
     def __apply_nlp_to_book(self, f):
         book_text = f.read()
         text_size = len(book_text)

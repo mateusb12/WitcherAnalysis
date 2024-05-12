@@ -10,7 +10,7 @@ from source.nlp_processing.entity_analysis.relationship_creator import Relations
 from source.nlp_processing.model_loader import load_nlp_model
 
 
-class BookAnalysisPipeline:
+class BooKEntityNetworkBuilder:
     def __init__(self, nlp_model, series_tag="harry_potter"):
         self.book_manager = BookManager(nlp_model, series_tag)
         self.entity_extractor = EntityExtractor()
@@ -50,7 +50,7 @@ class BookAnalysisPipeline:
 
 def main():
     model = load_nlp_model()
-    pipeline = BookAnalysisPipeline(model)
+    pipeline = BooKEntityNetworkBuilder(model)
     network_df = pipeline.run_pipeline(1)
     return network_df
 

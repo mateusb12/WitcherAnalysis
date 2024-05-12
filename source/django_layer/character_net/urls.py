@@ -23,6 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('django_layer.api.urls')),
     path('book_analysis/', views.upload_form),
-    path('upload_info/', views.upload_info, name='upload_info'),
+    path('upload_books/', views.upload_books, name='upload_books'),
     path('', views.entry_page, name='entry_page')
 ]
