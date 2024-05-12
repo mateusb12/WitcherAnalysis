@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="icons/upload-icon.png">
     <title>Upload Component</title>
     <style>
         .upload-container {
@@ -17,7 +18,7 @@
         }
 
         #drop_zone_txt {
-            margin-bottom: 10px; /* Adjust as needed */
+            margin-bottom: 10px;
         }
 
         .upload-icon {
@@ -37,11 +38,11 @@
             opacity: 0;
         }
 
-        .file-display-container {
+        .already-uploaded-txt {
             border: 2px dashed #ccc;
             border-radius: 10px;
             width: 20%;
-            min-width: 300px; /* Ensures a minimum width for smaller screens */
+            min-width: 300px;
             margin: 20px auto;
             padding: 10px;
             text-align: center;
@@ -51,7 +52,7 @@
             background-color: #f0f0f0;
         }
 
-        .file-display-container:hover {
+        .already-uploaded-txt:hover {
             background-color: #f9f9f9;
         }
 
@@ -91,17 +92,56 @@
     <input type="file" id="file_input_csv" multiple style="display:none;">
 </div>
 
-<div class="file-display-container">
-    <img src="icons/txt-file.png" alt="File Icon" style="height: 50px;">
-    <div class="file-description">
-        <h3>HannahBusing_Resume.pdf</h3>
-        <p class="file-info">File size: 200 KB</p>
-    </div>
-    <img src="icons/trash.png" alt="Download" class="download-button" id="trash-icon">
-</div>
+<!--<div class="already-uploaded-txt">-->
+<!--    <img src="icons/txt-file.png" alt="File Icon" style="height: 50px;">-->
+<!--    <div class="file-description">-->
+<!--        <h3>HannahBusing_Resume.pdf</h3>-->
+<!--        <p class="file-info">File size: 200 KB</p>-->
+<!--    </div>-->
+<!--    <img src="icons/trash.png" alt="Download" class="download-button" id="trash-icon">-->
+<!--</div>-->
 
 
 <script>
+    function setupTrashIcon() {
+        let trashIcons = document.querySelectorAll('.download-button');
+
+        trashIcons.forEach(function (trashIcon) {
+            trashIcon.addEventListener('mouseover', function () {
+                trashIcon.src = 'icons/red_trash.png';
+            });
+
+            trashIcon.addEventListener('mouseout', function () {
+                trashIcon.src = 'icons/trash.png';
+            });
+        });
+    }
+
+    function getUploadedFileTemplate(iconFilename, fileName, fileSize) {
+        return `
+        <img src="icons/${iconFilename}" alt="File Icon" style="height: 50px;">
+        <div class="file-description">
+            <h3>${fileName}</h3>
+            <p class="file-info">File size: ${fileSize / 1000} KB</p>
+        </div>
+        <img src="icons/trash.png" alt="Download" class="download-button" id="trash-icon">
+    `;
+    }
+
+    function handleFileUpload(fileInput, dropZone) {
+        console.log(`${fileInput.id} Files selected:`, fileInput.files);
+        if (fileInput.files.length > 0) {
+            let newDiv = document.createElement('div');
+            newDiv.className = 'already-uploaded-txt';
+            newDiv.innerHTML = getUploadedFileTemplate(
+                fileInput.id === 'file_input_txt' ? 'txt-file.png' : 'csv-file.png',
+                fileInput.files[0].name,
+                fileInput.files[0].size);
+            dropZone.replaceWith(newDiv);
+            setupTrashIcon();
+        }
+    }
+
     function setupDragAndDrop(elementId, inputId) {
         let dropZone = document.getElementById(elementId);
         let fileInput = document.getElementById(inputId);
@@ -128,23 +168,16 @@
         });
 
         fileInput.addEventListener('change', function () {
-            console.log(`${inputId} Files selected:`, fileInput.files);
+            handleFileUpload(fileInput, dropZone);
         });
     }
 
     // Setup for both file inputs
     setupDragAndDrop('drop_zone_txt', 'file_input_txt');
     setupDragAndDrop('drop_zone_csv', 'file_input_csv');
+    setupTrashIcon();
 
-    let trashIcon = document.getElementById('trash-icon');
 
-    trashIcon.addEventListener('mouseover', function () {
-        trashIcon.src = 'icons/red_trash.png';
-    });
-
-    trashIcon.addEventListener('mouseout', function () {
-        trashIcon.src = 'icons/trash.png';
-    });
 </script>
 
 </body>
