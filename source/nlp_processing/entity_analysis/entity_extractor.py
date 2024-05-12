@@ -14,21 +14,24 @@ class EntityExtractor:
      It analyses each book and creates an entities.csv file in the book_entities folder."""
 
     def __init__(self):
-        self.current_book: Doc = None
+        self.current_book_entities: Doc = None
         self.current_file: Optional[os.DirEntry] = None
         self.series_tag: str = "harry_potter"
 
     def set_information(self, book: Doc, file: Path, series: str):
-        self.current_book = book
+        self.current_book_entities = book
         self.current_file = file
         self.series_tag = series
 
-    def __extract_book_entities(self) -> pd.DataFrame:
+    def setup_entity_data(self, entities: Doc):
+        self.current_book_entities = entities
+
+    def extract_book_entities(self) -> pd.DataFrame:
         entity_pot = []
-        size = len(list(self.current_book.sents))
+        size = len(list(self.current_book_entities.sents))
         time_start = time.time()
 
-        for index, sentence in enumerate(self.current_book.sents):
+        for index, sentence in enumerate(self.current_book_entities.sents):
             print_progress(index, size, time_start)
             entity_list = extract_entities(sentence)
             if entity_list:
@@ -49,7 +52,7 @@ class EntityExtractor:
 
     def _create_new_book_entity_table(self) -> pd.DataFrame:
         print("Book entity not found. Processing a new one...")
-        book_entities: pd.DataFrame = self.__extract_book_entities()
+        book_entities: pd.DataFrame = self.extract_book_entities()
         output_location = Path(get_entities_file_path(self.series_tag), f"{self.__get_file_tag()}")
         handle_new_folder(output_location)
         book_entities.to_csv(output_location, index=False)

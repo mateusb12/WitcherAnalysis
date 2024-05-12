@@ -1,5 +1,6 @@
 import os
 
+import pandas as pd
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import get_resolver
@@ -8,6 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from nlp_processing.entity_network_from_filedata import EntityNetworkPipeline
+from utils.csv_utils import convert_string_to_dataframe
 from utils.django_utils import get_all_url_patterns
 from .serializers import FileUploadSerializer
 from django.conf import settings
@@ -49,8 +52,12 @@ def upload_books(request):
         dict_data = request.POST.dict()
         csv_data = {key: value for key, value in dict_data.items() if key.startswith('csv_')}
         txt_data = {key: value for key, value in dict_data.items() if key.startswith('txt_')}
-        print({k: v for k, v in csv_data.items() if k != 'csv_contents'})
-        print({k: v for k, v in txt_data.items() if k != 'txt_contents'})
+        csv_content: pd.DataFrame = convert_string_to_dataframe(csv_data["csv_contents"])
+        txt_content: str = txt_data["txt_contents"]
+        print("Starting entity processing...")
+        entity_processor = EntityNetworkPipeline()
+        entity_processor.setup(text_data=txt_content, character_table=csv_content)
+        entity_df = entity_processor.get_booK_entity_dataframe()
         return HttpResponse(status=204)
     else:
         # If the request method is not POST, return an appropriate HTTP response
