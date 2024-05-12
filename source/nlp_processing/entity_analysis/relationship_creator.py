@@ -20,7 +20,7 @@ class RelationshipCreator:
         for i in range(self.entity_df.index[-1]):
             window_end = min(i + self.window_size, maximum_df_index)
             window = self.entity_df.loc[i:i + window_end]
-            window_characters = sum(window.character_entities, [])
+            window_characters = sum(window.entities, [])
             unique_characters = remove_string_duplicates(window_characters)
             relationships = get_source_target_relationship_list(unique_characters)
             relationship_pot.extend(relationships)

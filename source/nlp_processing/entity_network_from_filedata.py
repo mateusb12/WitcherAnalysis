@@ -2,6 +2,7 @@ import pandas as pd
 from spacy.tokens import Doc
 
 from nlp_processing.entity_analysis.entity_extractor import EntityExtractor
+from nlp_processing.entity_analysis.node_plot import NodePlot
 from nlp_processing.entity_analysis.relationship_creator import RelationshipCreator
 from nlp_processing.entity_analysis.text_processor import TextProcessor
 from nlp_processing.model_loader import load_nlp_model
@@ -14,18 +15,23 @@ class EntityNetworkPipeline:
         self.text_processor = TextProcessor(self.model)
         self.entity_extractor = EntityExtractor()
         self.relationship_creator = RelationshipCreator()
+        self.node_plot = NodePlot()
         self.text_data: str = ""
         self.character_table: pd.DataFrame = pd.DataFrame()
+        self.book_filename: str = ""
 
-    def setup(self, text_data: str, character_table: pd.DataFrame):
+    def setup(self, text_data: str, character_table: pd.DataFrame, book_filename: str):
         self.text_data = text_data
         self.character_table = character_table
+        self.book_filename = book_filename
 
     def analyze_pipeline(self):
         entity_df = self.get_booK_entity_dataframe()
         character_only_df = self.filter_entity_dataframe(entity_df)
         self.relationship_creator.set_entity_df(character_only_df)
         relationship_df = self.relationship_creator.aggregate_network()
+        self.node_plot.set_network_df(relationship_df)
+        self.node_plot.plot(book_name=self.book_filename)
         pass
 
     def get_booK_entity_dataframe(self) -> pd.DataFrame:

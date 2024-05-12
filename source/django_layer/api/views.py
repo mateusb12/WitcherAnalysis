@@ -52,11 +52,12 @@ def upload_books(request):
         dict_data = request.POST.dict()
         csv_data = {key: value for key, value in dict_data.items() if key.startswith('csv_')}
         txt_data = {key: value for key, value in dict_data.items() if key.startswith('txt_')}
+        txt_filename = txt_data["txt_filename"]
         csv_content: pd.DataFrame = convert_string_to_dataframe(csv_data["csv_contents"])
         txt_content: str = txt_data["txt_contents"]
         print("Starting entity processing...")
         entity_processor = EntityNetworkPipeline()
-        entity_processor.setup(text_data=txt_content, character_table=csv_content)
+        entity_processor.setup(text_data=txt_content, character_table=csv_content, book_filename=txt_filename)
         entity_processor.analyze_pipeline()
         return HttpResponse(status=204)
     else:
