@@ -121,7 +121,7 @@
         originalDiv.id = parentDiv.id === 'txt' ? 'drop_zone_txt' : 'drop_zone_csv';
         originalDiv.className = 'upload-container';
         originalDiv.innerHTML = `
-        <div class="upload-icon" style="background-image: url('icons/submit_${parentDiv.id}.png');"></div>
+        <div class="upload-icon" style="background-image: url('/static/icons/submit_${parentDiv.id}.png');"></div>
         <p>Click to Upload or drag and drop.</p>
         <p> This is your book .${parentDiv.id} file</p>
         <p>(Max. File size: 25 MB)</p>
@@ -136,11 +136,11 @@
 
         trashIcons.forEach(function (trashIcon) {
             trashIcon.addEventListener('mouseover', function () {
-                trashIcon.src = 'icons/red_trash.png';
+                trashIcon.src = '/static/icons/red_trash.png';
             });
 
             trashIcon.addEventListener('mouseout', function () {
-                trashIcon.src = 'icons/trash.png';
+                trashIcon.src = '/static/icons/trash.png';
             });
 
             trashIcon.addEventListener('click', function () {
@@ -151,13 +151,13 @@
 
     function getUploadedFileTemplate(iconFilename, fileName, fileSize) {
         return `
-        <img src="icons/${iconFilename}" alt="File Icon" style="height: 50px;">
-        <div class="file-description">
-            <h3>${fileName}</h3>
-            <p class="file-info">File size: ${(fileSize / 1000000).toFixed(2)} MB</p>
-        </div>
-        <img src="icons/trash.png" alt="Delete" class="trash-button" id="trash-icon">
-    `;
+    <img src="/static/icons/${iconFilename}" alt="File Icon" style="height: 50px;">
+    <div class="file-description">
+        <h3>${fileName}</h3>
+        <p class="file-info">File size: ${(fileSize / 1000000).toFixed(2)} MB</p>
+    </div>
+    <img src="/static/icons/trash.png" alt="Delete" class="trash-button" id="trash-icon">
+`;
     }
 
     function handleFileUpload(fileInput, dropZone) {
@@ -172,7 +172,15 @@
                 fileInput.files[0].size);
             dropZone.replaceWith(newDiv);
             setupTrashIcon();
+            sendAjaxRequestToDjango(fileInput);
         }
+    }
+
+    function sendAjaxRequestToDjango(fileInput) {
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload_info/', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send(`filename=${fileInput.files[0].name}&filesize=${fileInput.files[0].size}`);
     }
 
     function setupDragAndDrop(elementId, inputId) {

@@ -3,6 +3,7 @@ import os
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import get_resolver
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -40,6 +41,14 @@ def upload_form(request):
     print(form_location)
     with open(form_location, 'r') as file:
         return HttpResponse(file.read())
+
+@csrf_exempt
+def upload_info(request):
+    if request.method == 'POST':
+        filename = request.POST.get('filename')
+        filesize = request.POST.get('filesize')
+        print(f'Filename: {filename}, Filesize: {filesize}')
+    return HttpResponse(status=204)
 
 
 def home(request):

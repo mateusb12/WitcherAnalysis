@@ -22,6 +22,7 @@ from django_layer.api import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('django_layer.api.urls')),
-    path('book_analysis/',  views.upload_form),
+    path('book_analysis/', views.upload_form),
+    path('upload_info/', views.upload_info, name='upload_info'),
     path('', views.entry_page, name='entry_page')
 ]
