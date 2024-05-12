@@ -57,7 +57,7 @@ def upload_books(request):
         print("Starting entity processing...")
         entity_processor = EntityNetworkPipeline()
         entity_processor.setup(text_data=txt_content, character_table=csv_content)
-        entity_df = entity_processor.get_booK_entity_dataframe()
+        entity_processor.analyze_pipeline()
         return HttpResponse(status=204)
     else:
         # If the request method is not POST, return an appropriate HTTP response

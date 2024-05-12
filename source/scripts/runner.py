@@ -4,7 +4,7 @@ from source.nlp_processing.entity_analysis.book_manager import BookManager
 from source.nlp_processing.entity_analysis.entity_filter import EntityFilter
 from source.nlp_processing.model_loader import load_nlp_model
 from source.nlp_processing.entity_analysis.relationship_creator import RelationshipCreator
-from source.witcher_network.node_plot import NodePlot
+from nlp_processing.entity_analysis.node_plot import NodePlot
 
 
 class Runner:
