@@ -115,6 +115,8 @@
 
 
 <script>
+    let uploadedFiles = [];
+
     function handleFileDelete(trashIcon) {
         let parentDiv = trashIcon.parentElement;
         let originalDiv = document.createElement('div');
@@ -172,16 +174,39 @@
                 fileInput.files[0].size);
             dropZone.replaceWith(newDiv);
             setupTrashIcon();
-            sendAjaxRequestToDjango(fileInput);
+
+            // Read the file contents
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                // Store the file information and contents in the global variable
+                uploadedFiles.push({
+                    filename: fileInput.files[0].name,
+                    filesize: fileInput.files[0].size,
+                    contents: e.target.result
+                });
+            };
+            reader.readAsText(fileInput.files[0]);
         }
+        console.log('Uploaded Files:', uploadedFiles);
     }
 
-    function sendAjaxRequestToDjango(fileInput) {
+    function sendAjaxRequestToDjango() {
         let xhr = new XMLHttpRequest();
         xhr.open('POST', '/upload_info/', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send(`filename=${fileInput.files[0].name}&filesize=${fileInput.files[0].size}`);
+
+        // Find the .txt and .csv files in the uploadedFiles array
+        let txtFile = uploadedFiles.find(file => file.filename.endsWith('.txt'));
+        let csvFile = uploadedFiles.find(file => file.filename.endsWith('.csv'));
+
+        let txtData = `txt_filename=${txtFile.filename}&txt_filesize=${txtFile.filesize}&txt_contents=${txtFile.contents}`;
+        let csvData = `csv_filename=${csvFile.filename}&csv_filesize=${csvFile.filesize}&csv_contents=${csvFile.contents}`;
+        let mergedData = `${txtData}&${csvData}`;
+        console.log('Data being sent:', mergedData);
+        xhr.send(mergedData);
     }
+
+    document.getElementById('submit-button').addEventListener('click', sendAjaxRequestToDjango);
 
     function setupDragAndDrop(elementId, inputId) {
         let dropZone = document.getElementById(elementId);

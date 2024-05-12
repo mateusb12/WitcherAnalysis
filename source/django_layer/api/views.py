@@ -42,14 +42,20 @@ def upload_form(request):
     with open(form_location, 'r') as file:
         return HttpResponse(file.read())
 
+
 @csrf_exempt
 def upload_info(request):
     if request.method == 'POST':
-        filename = request.POST.get('filename')
-        filesize = request.POST.get('filesize')
-        print(f'Filename: {filename}, Filesize: {filesize}')
-    return HttpResponse(status=204)
-
+        # Retrieve the file information from the AJAX request
+        dict_data = request.POST.dict()
+        csv_data = {key: value for key, value in dict_data.items() if key.startswith('csv_')}
+        txt_data = {key: value for key, value in dict_data.items() if key.startswith('txt_')}
+        print({k: v for k, v in csv_data.items() if k != 'csv_contents'})
+        print({k: v for k, v in txt_data.items() if k != 'txt_contents'})
+        return HttpResponse(status=204)
+    else:
+        # If the request method is not POST, return an appropriate HTTP response
+        return HttpResponse(status=405)
 
 def home(request):
     return HttpResponse("Hello, World!")
