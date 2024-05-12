@@ -61,7 +61,7 @@
             color: #555;
         }
 
-        .download-button {
+        .trash-button {
             position: absolute;
             right: 10px;
             bottom: 10px;
@@ -70,8 +70,27 @@
             cursor: pointer;
         }
 
-        .download-button:hover {
-            opacity: 0.8; /* Adds a hover effect to the download icon */
+        .trash-button:hover {
+            opacity: 0.8;
+        }
+
+        .button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -79,7 +98,7 @@
 <div id="drop_zone_txt" class="upload-container">
     <div class="upload-icon" style="background-image: url('icons/submit_txt.png');"></div>
     <p>Click to Upload or drag and drop.</p>
-    <p> This is your book .txt file</p>
+    <h3> This should be your book .txt file</h3>
     <p>(Max. File size: 25 MB)</p>
     <input type="file" id="file_input_txt" multiple style="display:none;">
 </div>
@@ -87,19 +106,12 @@
 <div id="drop_zone_csv" class="upload-container">
     <div class="upload-icon" style="background-image: url('icons/submit_csv.png');"></div>
     <p>Click to Upload or drag and drop.</p>
-    <p> This is your data .csv file</p>
+    <h3> This should be your character .csv table</h3>
     <p>(Max. File size: 25 MB)</p>
     <input type="file" id="file_input_csv" multiple style="display:none;">
 </div>
 
-<!--<div class="already-uploaded-txt">-->
-<!--    <img src="icons/txt-file.png" alt="File Icon" style="height: 50px;">-->
-<!--    <div class="file-description">-->
-<!--        <h3>HannahBusing_Resume.pdf</h3>-->
-<!--        <p class="file-info">File size: 200 KB</p>-->
-<!--    </div>-->
-<!--    <img src="icons/trash.png" alt="Download" class="download-button" id="trash-icon">-->
-<!--</div>-->
+<button class="button" id="submit-button">Analyze</button>
 
 
 <script>
@@ -120,7 +132,7 @@
     }
 
     function setupTrashIcon() {
-        let trashIcons = document.querySelectorAll('.download-button');
+        let trashIcons = document.querySelectorAll('.trash-button');
 
         trashIcons.forEach(function (trashIcon) {
             trashIcon.addEventListener('mouseover', function () {
@@ -142,9 +154,9 @@
         <img src="icons/${iconFilename}" alt="File Icon" style="height: 50px;">
         <div class="file-description">
             <h3>${fileName}</h3>
-            <p class="file-info">File size: ${fileSize / 1000} KB</p>
+            <p class="file-info">File size: ${(fileSize / 1000000).toFixed(2)} MB</p>
         </div>
-        <img src="icons/trash.png" alt="Download" class="download-button" id="trash-icon">
+        <img src="icons/trash.png" alt="Delete" class="trash-button" id="trash-icon">
     `;
     }
 
