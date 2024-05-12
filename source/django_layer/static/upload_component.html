@@ -103,6 +103,22 @@
 
 
 <script>
+    function handleFileDelete(trashIcon) {
+        let parentDiv = trashIcon.parentElement;
+        let originalDiv = document.createElement('div');
+        originalDiv.id = parentDiv.id === 'txt' ? 'drop_zone_txt' : 'drop_zone_csv';
+        originalDiv.className = 'upload-container';
+        originalDiv.innerHTML = `
+        <div class="upload-icon" style="background-image: url('icons/submit_${parentDiv.id}.png');"></div>
+        <p>Click to Upload or drag and drop.</p>
+        <p> This is your book .${parentDiv.id} file</p>
+        <p>(Max. File size: 25 MB)</p>
+        <input type="file" id="file_input_${parentDiv.id}" multiple style="display:none;">
+    `;
+        parentDiv.replaceWith(originalDiv);
+        setupDragAndDrop(originalDiv.id, `file_input_${parentDiv.id}`);
+    }
+
     function setupTrashIcon() {
         let trashIcons = document.querySelectorAll('.download-button');
 
@@ -113,6 +129,10 @@
 
             trashIcon.addEventListener('mouseout', function () {
                 trashIcon.src = 'icons/trash.png';
+            });
+
+            trashIcon.addEventListener('click', function () {
+                handleFileDelete(trashIcon);
             });
         });
     }
@@ -133,6 +153,7 @@
         if (fileInput.files.length > 0) {
             let newDiv = document.createElement('div');
             newDiv.className = 'already-uploaded-txt';
+            newDiv.id = dropZone.id === 'drop_zone_txt' ? 'txt' : 'csv';
             newDiv.innerHTML = getUploadedFileTemplate(
                 fileInput.id === 'file_input_txt' ? 'txt-file.png' : 'csv-file.png',
                 fileInput.files[0].name,
