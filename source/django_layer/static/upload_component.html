@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="icons/upload-icon.png">
+    <link rel="icon" href="/static/icons/upload-icon.png">
     <title>Upload Component</title>
     <style>
         .upload-container {
@@ -77,8 +77,8 @@
         .button {
             display: block;
             margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 20px 40px;
+            font-size: 20px;
             color: #ffffff;
             background-color: #28a745;
             border: none;
@@ -96,19 +96,19 @@
 </head>
 <body>
 <div id="drop_zone_txt" class="upload-container">
-    <div class="upload-icon" style="background-image: url('icons/submit_txt.png');"></div>
+    <div class="upload-icon" style="background-image: url('/static/icons/submit_txt.png');"></div>
     <p>Click to Upload or drag and drop.</p>
     <h3> This should be your book .txt file</h3>
     <p>(Max. File size: 25 MB)</p>
-    <input type="file" id="file_input_txt" multiple style="display:none;">
+    <input type="file" id="file_input_txt" accept=".txt" multiple style="display:none;">
 </div>
 
 <div id="drop_zone_csv" class="upload-container">
-    <div class="upload-icon" style="background-image: url('icons/submit_csv.png');"></div>
+    <div class="upload-icon" style="background-image: url('/static/icons/submit_csv.png');"></div>
     <p>Click to Upload or drag and drop.</p>
     <h3> This should be your character .csv table</h3>
     <p>(Max. File size: 25 MB)</p>
-    <input type="file" id="file_input_csv" multiple style="display:none;">
+    <input type="file" id="file_input_csv" accept=".csv" multiple style="display:none;">
 </div>
 
 <button class="button" id="submit-button">Analyze</button>
