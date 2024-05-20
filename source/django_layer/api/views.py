@@ -18,7 +18,7 @@ from django.conf import settings
 
 class FileUploadView(APIView):
     def get(self, request, *args, **kwargs):
-        return render(request, 'upload_form.html')
+        return render(request, 'progress_bar.html')
 
     def post(self, request, *args, **kwargs):
         serializer = FileUploadSerializer(data=request.data)

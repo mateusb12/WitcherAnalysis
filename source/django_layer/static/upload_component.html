@@ -17,6 +17,12 @@
             position: relative;
         }
 
+        .upload-container:hover {
+            border: 2px solid #ccc;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+
         #drop_zone_txt {
             margin-bottom: 10px;
         }
@@ -29,17 +35,13 @@
             background-size: contain;
         }
 
-        .upload-container:hover {
-            background-color: #f9f9f9;
-            cursor: pointer;
-        }
 
         input[type="file"] {
             opacity: 0;
         }
 
         .already-uploaded-txt {
-            border: 2px dashed #ccc;
+            border: 2px solid #979797;
             border-radius: 10px;
             width: 20%;
             min-width: 300px;

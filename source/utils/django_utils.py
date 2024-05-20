@@ -7,7 +7,8 @@ def get_all_url_patterns(urlpatterns, prefix=''):
     The list includes URL patterns defined in the root urls.py file and in all included urls.py files.
     """
     urls = []
-    for pattern in urlpatterns:
+    filtered_url_patterns = [pattern for pattern in urlpatterns if 'admin' not in str(pattern.pattern)]
+    for pattern in filtered_url_patterns:
         if isinstance(pattern, URLResolver):
             urls += get_all_url_patterns(pattern.url_patterns, prefix + str(pattern.pattern))
         elif isinstance(pattern, URLPattern):
