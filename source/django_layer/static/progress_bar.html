@@ -51,7 +51,7 @@
         const progressBar = document.getElementById('progress-bar');
         let completionTimeSeconds = 5;
         progressBar.style.animation = `progress-animation ${completionTimeSeconds}s linear forwards`;
-        let intervalTimeMs = 1000;
+        let intervalTimeMs = 500;
         let updates = (completionTimeSeconds * 1000) / intervalTimeMs;
         let increment = 100 / updates;
         console.log("Updates = ", updates);
