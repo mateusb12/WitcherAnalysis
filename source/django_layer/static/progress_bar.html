@@ -47,27 +47,30 @@
 
 <button onClick="upload()">Upload</button>
 <script>
-    const upload = () => {
-        const progressBar = document.getElementById('progress-bar');
-        let completionTimeSeconds = 5;
-        progressBar.style.animation = `progress-animation ${completionTimeSeconds}s linear forwards`;
-        let intervalTimeMs = 500;
-        let updates = (completionTimeSeconds * 1000) / intervalTimeMs;
-        let increment = 100 / updates;
-        console.log("Updates = ", updates);
-        console.log("Increment = ", increment);
+const upload = () => {
+    const progressBar = document.getElementById('progress-bar');
+    let completionTimeSeconds = 5;
+    let intervalTimeMs = 50;
+    let updates = (completionTimeSeconds * 1000) / intervalTimeMs;
+    let increment = 1 / updates;
 
-        let progress = 0;
-        const interval = setInterval(() => {
-            if (progress + increment > 100) {
-                progressBar.textContent = "100%";
-                clearInterval(interval);
-            } else {
-                progress += increment;
-                progressBar.textContent = `${progress.toFixed(1)}%`;
-            }
-        }, intervalTimeMs)
-    }
+    let progress = 0;
+    const interval = setInterval(() => {
+        if (progress + increment > 1) {
+            updateBarProgress(1);
+            clearInterval(interval);
+        } else {
+            progress += increment;
+            updateBarProgress(progress);
+        }
+    }, intervalTimeMs)
+}
+
+const updateBarProgress = (value) => {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = `${value * 100}%`;
+    progressBar.textContent = `${(value * 100).toFixed(1)}%`;
+}
 
 
 </script>
