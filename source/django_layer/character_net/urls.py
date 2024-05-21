@@ -25,5 +25,6 @@ urlpatterns = [
     path('book_analysis/', views.upload_form),
     path('upload_books/', views.upload_books, name='upload_books'),
     path('progress_bar/', views.FileUploadView.as_view(), name='progress_bar'),
+    path('progress_update_view/', views.progress_update_view, name='progress_update_view'),
     path('', views.entry_page, name='entry_page')
 ]

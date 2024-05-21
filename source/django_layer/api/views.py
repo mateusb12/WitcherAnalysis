@@ -65,6 +65,20 @@ def upload_books(request):
         return HttpResponse(status=405)
 
 
+@csrf_exempt
+def progress_update_view(request):
+    if request.method == 'POST':
+        progress = request.POST.get('progress')
+        if progress is not None:
+            progress = float(progress)
+            request.session['upload_progress'] = progress
+            return JsonResponse({'progress': progress})
+        else:
+            return JsonResponse({'error': 'No progress value provided'}, status=400)
+    else:
+        return HttpResponse(status=405)
+
+
 def home(request):
     return HttpResponse("Hello, World!")
 

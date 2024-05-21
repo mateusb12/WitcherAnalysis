@@ -4,6 +4,8 @@ import time
 from pathlib import Path
 
 import pandas as pd
+import requests
+from django.urls import reverse
 from spacy.tokens import Doc
 
 from source.data.cache.cache_loader import existing_nlp_cache, NLP_CACHE_PATH
@@ -45,7 +47,15 @@ def print_progress(index, size, time_start):
     eta_str = time.strftime("%H:%M:%S", time.localtime(eta))
     if index % 10 == 0:
         print(
-            f"Processing sentence {index} of {size} ({percentage}%), speed: {round(speed, 2)} sentences/s, ETA {eta_str}")
+            f"Processing sentence {index} of {size} ({percentage}%), speed: {round(speed, 2)} sentences/s,"
+            f" ETA {eta_str}")
+        progress_bar_callback(percentage)
+
+
+def progress_bar_callback(percentage):
+    progress_url = reverse('progress_update_view')
+    full_url = 'http://127.0.0.1:8000' + progress_url
+    requests.post(full_url, data={'progress': percentage})
 
 
 def cast_to_str(list_obj: list) -> str:

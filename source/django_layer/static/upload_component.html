@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <link rel="icon" href="/static/icons/upload-icon.png">
     <title>Upload Component</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
         .upload-container {
             border: 2px dashed #ccc;
@@ -94,6 +95,30 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
+
+        .progress-bar-container {
+            text-align: center;
+            color: #888;
+            font-family: Arial, sans-serif;
+            border: .2rem solid #ccc;
+            border-radius: 1rem;
+            padding: 0;
+            height: 1.5rem;
+            width: 30rem;
+            position: relative;
+            margin: auto;
+        }
+
+        .progress-bar {
+            position: absolute;
+            width: 0;
+            height: 90%;
+            background-color: #4CAF50;
+            color: white;
+            border: .1rem solid #000000;
+            border-radius: 1rem;
+            animation-fill-mode: forwards;
+        }
     </style>
 </head>
 <body>
@@ -113,7 +138,13 @@
     <input type="file" id="file_input_csv" accept=".csv" multiple style="display:none;">
 </div>
 
-<button class="button" id="submit-button">Analyze</button>
+<button class="button" onclick="upload()" id="submit-button">Analyze</button>
+
+<div class="progress-bar-container">
+    <div class="progress-bar" id="progress-bar">
+        progress
+    </div>
+</div>
 
 
 <script>
@@ -180,7 +211,6 @@
             // Read the file contents
             let reader = new FileReader();
             reader.onload = function (e) {
-                // Store the file information and contents in the global variable
                 uploadedFiles.push({
                     filename: fileInput.files[0].name,
                     filesize: fileInput.files[0].size,
@@ -244,6 +274,33 @@
     setupDragAndDrop('drop_zone_txt', 'file_input_txt');
     setupDragAndDrop('drop_zone_csv', 'file_input_csv');
     setupTrashIcon();
+
+    const upload = () => {
+        setInterval(updateProgressBar, 100);
+    }
+
+    document.getElementById('submit-button').addEventListener('click', upload);
+
+    function updateProgressBar() {
+        $.ajax({
+            url: '/progress_update_view/',  // URL of the Django view
+            method: 'POST',  // Specify the method as POST
+            success: function (data) {
+                console.log("Data is ", data);
+                let progress = data.progress;
+                if (progress !== null) {
+                    updateBarProgress(progress);
+                }
+            }
+        });
+    }
+
+
+    const updateBarProgress = (value) => {
+        const progressBar = document.getElementById('progress-bar');
+        progressBar.style.width = `${value * 100}%`;
+        progressBar.textContent = `${(value * 100).toFixed(1)}%`;
+    }
 
 
 </script>
