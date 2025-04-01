@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/static/icons/upload-icon.png">
     <title>Upload Component</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -22,9 +23,16 @@
             margin: 0;
             padding: 0;
             font-family: 'Quicksand', sans-serif;
-            background: url('/static/background/ghibli_background.png') no-repeat center center;
-            background-size: cover;
             color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #dbefff;
+            background-image: url('/static/background/ghibli_background.png');
+            background-repeat: no-repeat;
+            background-position: bottom right;
+            background-size: cover;
         }
 
         /*
@@ -41,7 +49,7 @@
             background-color: rgba(255, 255, 255, 0.3);
             border-radius: 1rem;
             padding: 2rem;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
         /*
@@ -131,7 +139,7 @@
             border-radius: 2rem;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.3s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         .button:hover {
@@ -181,14 +189,25 @@
            -------------
            Ensure everything looks good on smaller screens.
         */
-        @media (max-width: 768px) {
+        @media (max-width: 1200px) {
+            body {
+                /*border: 3px red solid;*/
+                background-image: url('/static/background/ghibli_mobile.png');
+                background-position: center center;
+            }
+
             .main-content {
                 margin: 1rem;
                 padding: 1rem;
             }
-            .upload-container, .already-uploaded-txt {
-                max-width: 100%;
+
+            .upload-container,
+            .already-uploaded-txt,
+            .progress-bar-container {
+                max-width: 77%;
+                /*width: 100%;*/
             }
+
             .progress-bar-container {
                 width: 80%;
             }
@@ -381,7 +400,6 @@
         progressBar.style.width = `${value * 100}%`;
         progressBar.textContent = `${(value * 100).toFixed(1)}%`;
     }
-
 
 </script>
 
