@@ -10,7 +10,7 @@ from utils.entity_utils import filter_entity_df
 
 
 class EntityNetworkPipeline:
-    def __init__(self):
+    def __init__(self, progress_callback=None):
         self.model = load_nlp_model()
         self.text_processor = TextProcessor(self.model)
         self.entity_extractor = EntityExtractor()
@@ -19,6 +19,7 @@ class EntityNetworkPipeline:
         self.text_data: str = ""
         self.character_table: pd.DataFrame = pd.DataFrame()
         self.book_filename: str = ""
+        self.progress_callback = progress_callback
 
     def setup(self, text_data: str, character_table: pd.DataFrame, book_filename: str):
         self.text_data = text_data
@@ -36,6 +37,23 @@ class EntityNetworkPipeline:
 
     def get_booK_entity_dataframe(self) -> pd.DataFrame:
         entity_data: Doc = self.text_processor.analyze_book_from_text_data(self.text_data)
+
+        sentences = list(entity_data.sents)
+        total = len(sentences)
+
+        processed_spans = []
+
+        for idx, sent in enumerate(sentences):
+            processed_spans.append(sent)
+
+            # Report progress every 10 sentences (you can tweak this)
+            if self.progress_callback and idx % 10 == 0:
+                progress = (idx + 1) / total
+                self.progress_callback(progress)
+
+        # Reconstruct the Doc object with processed sentences
+        entity_data = Doc(entity_data.vocab, words=[token.text for sent in processed_spans for token in sent])
+
         self.entity_extractor.setup_entity_data(entity_data)
         return self.entity_extractor.extract_book_entities()
 

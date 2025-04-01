@@ -48,6 +48,9 @@ def upload_form(request):
 
 @csrf_exempt
 def upload_books(request):
+    def save_progress(progress):
+        request.session['upload_progress'] = progress
+
     if request.method == 'POST':
         dict_data = request.POST.dict()
         csv_data = {key: value for key, value in dict_data.items() if key.startswith('csv_')}
@@ -56,7 +59,7 @@ def upload_books(request):
         csv_content: pd.DataFrame = convert_string_to_dataframe(csv_data["csv_contents"])
         txt_content: str = txt_data["txt_contents"]
         print("Starting entity processing...")
-        entity_processor = EntityNetworkPipeline()
+        entity_processor = EntityNetworkPipeline(progress_callback=save_progress)
         entity_processor.setup(text_data=txt_content, character_table=csv_content, book_filename=txt_filename)
         entity_processor.analyze_pipeline()
         return HttpResponse(status=204)
@@ -68,13 +71,8 @@ def upload_books(request):
 @csrf_exempt
 def progress_update_view(request):
     if request.method == 'POST':
-        progress = request.POST.get('progress')
-        if progress is not None:
-            progress = float(progress)
-            request.session['upload_progress'] = progress
-            return JsonResponse({'progress': progress})
-        else:
-            return JsonResponse({'error': 'No progress value provided'}, status=400)
+        progress = request.session.get('upload_progress', 0)
+        return JsonResponse({'progress': progress})
     else:
         return HttpResponse(status=405)
 

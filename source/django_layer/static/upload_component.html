@@ -175,7 +175,7 @@
             width: 0;
             height: 100%;
             background-color: #87c6a3; /* a soft green shade */
-            color: #fff;
+            color: red;
             font-weight: 600;
             text-align: center;
             line-height: 1.5rem;
@@ -379,19 +379,19 @@
 
     document.getElementById('submit-button').addEventListener('click', upload);
 
-    function updateProgressBar() {
-        $.ajax({
-            url: '/progress_update_view/',  // URL of the Django view
-            method: 'POST',  // Specify the method as POST
-            success: function (data) {
-                console.log("Data is ", data);
-                let progress = data.progress;
-                if (progress !== null) {
-                    updateBarProgress(progress);
-                }
+function updateProgressBar() {
+    $.ajax({
+        url: '/progress_update_view/',
+        method: 'POST',
+        success: function (data) {
+            console.log("Data is ", data);
+            let progress = data.progress;
+            if (progress !== null) {
+                updateBarProgress(progress);
             }
-        });
-    }
+        }
+    });
+}
 
 
     const updateBarProgress = (value) => {
