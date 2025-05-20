@@ -263,182 +263,165 @@
 </div>
 
 
-<script>
+  <script>
+    // Array to store uploaded file info
     let uploadedFiles = [];
 
+    // -------------------------------
+    // File Upload & Drag and Drop Code
+    // -------------------------------
     function handleFileDelete(trashIcon) {
-        let parentDiv = trashIcon.parentElement;
-        let originalDiv = document.createElement('div');
-        originalDiv.id = parentDiv.id === 'txt' ? 'drop_zone_txt' : 'drop_zone_csv';
-        originalDiv.className = 'upload-container';
-        originalDiv.innerHTML = `
+      let parentDiv = trashIcon.parentElement;
+      let originalDiv = document.createElement('div');
+      originalDiv.id = parentDiv.id === 'txt' ? 'drop_zone_txt' : 'drop_zone_csv';
+      originalDiv.className = 'upload-container';
+      originalDiv.innerHTML = `
         <div class="upload-icon" style="background-image: url('/static/icons/submit_${parentDiv.id}.png');"></div>
         <p>Click to Upload or drag and drop.</p>
-        <p> This is your book .${parentDiv.id} file</p>
+        <p>This is your book .${parentDiv.id} file</p>
         <p>(Max. File size: 25 MB)</p>
         <input type="file" id="file_input_${parentDiv.id}" multiple style="display:none;">
-    `;
-        parentDiv.replaceWith(originalDiv);
-        setupDragAndDrop(originalDiv.id, `file_input_${parentDiv.id}`);
+      `;
+      parentDiv.replaceWith(originalDiv);
+      setupDragAndDrop(originalDiv.id, `file_input_${parentDiv.id}`);
     }
 
     function setupTrashIcon() {
-        let trashIcons = document.querySelectorAll('.trash-button');
-
-        trashIcons.forEach(function (trashIcon) {
-            trashIcon.addEventListener('mouseover', function () {
-                trashIcon.src = '/static/icons/red_trash.png';
-            });
-
-            trashIcon.addEventListener('mouseout', function () {
-                trashIcon.src = '/static/icons/trash.png';
-            });
-
-            trashIcon.addEventListener('click', function () {
-                handleFileDelete(trashIcon);
-            });
+      let trashIcons = document.querySelectorAll('.trash-button');
+      trashIcons.forEach(function (trashIcon) {
+        trashIcon.addEventListener('mouseover', function () {
+          trashIcon.src = '/static/icons/red_trash.png';
         });
+        trashIcon.addEventListener('mouseout', function () {
+          trashIcon.src = '/static/icons/trash.png';
+        });
+        trashIcon.addEventListener('click', function () {
+          handleFileDelete(trashIcon);
+        });
+      });
     }
 
     function getUploadedFileTemplate(iconFilename, fileName, fileSize) {
-        return `
-    <img src="/static/icons/${iconFilename}" alt="File Icon" style="height: 50px;">
-    <div class="file-description">
-        <h3>${fileName}</h3>
-        <p class="file-info">File size: ${(fileSize / 1000000).toFixed(2)} MB</p>
-    </div>
-    <img src="/static/icons/trash.png" alt="Delete" class="trash-button" id="trash-icon">
-`;
+      return `
+        <img src="/static/icons/${iconFilename}" alt="File Icon" style="height: 50px;">
+        <div class="file-description">
+          <h3>${fileName}</h3>
+          <p class="file-info">File size: ${(fileSize / 1000000).toFixed(2)} MB</p>
+        </div>
+        <img src="/static/icons/trash.png" alt="Delete" class="trash-button" id="trash-icon">
+      `;
     }
 
     function handleFileUpload(fileInput, dropZone) {
-        console.log(`${fileInput.id} Files selected:`, fileInput.files);
-        if (fileInput.files.length > 0) {
-            let newDiv = document.createElement('div');
-            newDiv.className = 'already-uploaded-txt';
-            newDiv.id = dropZone.id === 'drop_zone_txt' ? 'txt' : 'csv';
-            newDiv.innerHTML = getUploadedFileTemplate(
-                fileInput.id === 'file_input_txt' ? 'txt-file.png' : 'csv-file.png',
-                fileInput.files[0].name,
-                fileInput.files[0].size);
-            dropZone.replaceWith(newDiv);
-            setupTrashIcon();
-
-            // Read the file contents
-            let reader = new FileReader();
-            reader.onload = function (e) {
-                uploadedFiles.push({
-                    filename: fileInput.files[0].name,
-                    filesize: fileInput.files[0].size,
-                    contents: e.target.result
-                });
-            };
-            reader.readAsText(fileInput.files[0]);
-        }
-        console.log('Uploaded Files:', uploadedFiles);
-    }
-
-    function sendAjaxRequestToDjango() {
-        let xhr = new XMLHttpRequest();
-        xhr.open('POST', '/upload_books/', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-        // Find the .txt and .csv files in the uploadedFiles array
-        let txtFile = uploadedFiles.find(file => file.filename.endsWith('.txt'));
-        let csvFile = uploadedFiles.find(file => file.filename.endsWith('.csv'));
-
-        let txtData = `txt_filename=${txtFile.filename}&txt_filesize=${txtFile.filesize}&txt_contents=${txtFile.contents}`;
-        let csvData = `csv_filename=${csvFile.filename}&csv_filesize=${csvFile.filesize}&csv_contents=${csvFile.contents}`;
-        let mergedData = `${txtData}&${csvData}`;
-        console.log('Data being sent:', mergedData);
-
-        // When the request is done, start polling.
-        xhr.onload = function () {
-            // Now that processing has started, begin polling.
-            startPolling();
+      console.log(`${fileInput.id} Files selected:`, fileInput.files);
+      if (fileInput.files.length > 0) {
+        let newDiv = document.createElement('div');
+        newDiv.className = 'already-uploaded-txt';
+        newDiv.id = dropZone.id === 'drop_zone_txt' ? 'txt' : 'csv';
+        newDiv.innerHTML = getUploadedFileTemplate(
+          fileInput.id === 'file_input_txt' ? 'txt-file.png' : 'csv-file.png',
+          fileInput.files[0].name,
+          fileInput.files[0].size
+        );
+        dropZone.replaceWith(newDiv);
+        setupTrashIcon();
+        let reader = new FileReader();
+        reader.onload = function (e) {
+          uploadedFiles.push({
+            filename: fileInput.files[0].name,
+            filesize: fileInput.files[0].size,
+            contents: e.target.result
+          });
         };
-
-        xhr.send(mergedData);
+        reader.readAsText(fileInput.files[0]);
+      }
+      console.log('Uploaded Files:', uploadedFiles);
     }
-
-    let pollingInterval;
-
-    function startPolling() {
-        // Clear any previous interval to avoid duplicates.
-        if (pollingInterval) {
-            clearInterval(pollingInterval);
-        }
-        pollingInterval = setInterval(updateProgressBar, 1000); // Adjust the interval as needed
-    }
-
-    document.getElementById('submit-button').addEventListener('click', sendAjaxRequestToDjango);
 
     function setupDragAndDrop(elementId, inputId) {
-        let dropZone = document.getElementById(elementId);
-        let fileInput = document.getElementById(inputId);
-
-        dropZone.addEventListener('click', function () {
-            fileInput.click();
-        });
-
-        dropZone.addEventListener('dragover', function (e) {
-            e.preventDefault();
-            dropZone.classList.add('active');
-        });
-
-        dropZone.addEventListener('dragleave', function (e) {
-            e.preventDefault();
-            dropZone.classList.remove('active');
-        });
-
-        dropZone.addEventListener('drop', function (e) {
-            e.preventDefault();
-            dropZone.classList.remove('active');
-            fileInput.files = e.dataTransfer.files;
-            console.log(`${inputId} Files dropped:`, fileInput.files);
-        });
-
-        fileInput.addEventListener('change', function () {
-            handleFileUpload(fileInput, dropZone);
-        });
+      let dropZone = document.getElementById(elementId);
+      let fileInput = document.getElementById(inputId);
+      dropZone.addEventListener('click', function () {
+        fileInput.click();
+      });
+      dropZone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        dropZone.classList.add('active');
+      });
+      dropZone.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        dropZone.classList.remove('active');
+      });
+      dropZone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropZone.classList.remove('active');
+        fileInput.files = e.dataTransfer.files;
+        console.log(`${inputId} Files dropped:`, fileInput.files);
+      });
+      fileInput.addEventListener('change', function () {
+        handleFileUpload(fileInput, dropZone);
+      });
     }
 
-    // Setup for both file inputs
+    // Setup drag and drop for both file inputs
     setupDragAndDrop('drop_zone_txt', 'file_input_txt');
     setupDragAndDrop('drop_zone_csv', 'file_input_csv');
     setupTrashIcon();
 
-    const upload = () => {
-        setInterval(updateProgressBar, 100);
+    // -------------------------------
+    // AJAX File Upload Function
+    // -------------------------------
+    function sendAjaxRequestToDjango() {
+      let xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload_books/', true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      let txtFile = uploadedFiles.find(file => file.filename.endsWith('.txt'));
+      let csvFile = uploadedFiles.find(file => file.filename.endsWith('.csv'));
+      let txtData = `txt_filename=${encodeURIComponent(txtFile.filename)}&txt_filesize=${txtFile.filesize}&txt_contents=${encodeURIComponent(txtFile.contents)}`;
+      let csvData = `csv_filename=${encodeURIComponent(csvFile.filename)}&csv_filesize=${csvFile.filesize}&csv_contents=${encodeURIComponent(csvFile.contents)}`;
+      let mergedData = `${txtData}&${csvData}`;
+      console.log('Data being sent:', mergedData);
+      xhr.onload = function () {
+        console.log("Upload request complete, processing started.");
+        // Processing progress updates will now come via WebSocket.
+      };
+      xhr.send(mergedData);
     }
 
-    // document.getElementById('submit-button').addEventListener('click', upload);
+    // -------------------------------
+    // WebSocket for Progress Updates
+    // -------------------------------
+    const progressBar = document.getElementById('progress-bar');
+    // Use ws:// for HTTP and wss:// for HTTPS
+    const socket = new WebSocket(`ws://${window.location.host}/ws/progress/`);
 
-    function updateProgressBar() {
-        $.ajax({
-            url: '/progress_update_view/',
-            method: 'POST',
-            success: function (data) {
-                let progress = data.progress;
-                if (progress !== null) {
-                    updateBarProgress(progress);
-                    // If complete (e.g., progress >= 1), stop polling.
-                    if (progress >= 1) {
-                        clearInterval(pollingInterval);
-                    }
-                }
-            }
-        });
+    socket.onopen = function (e) {
+      console.log("WebSocket connection established.");
+    };
+
+    socket.onmessage = function (e) {
+      const data = JSON.parse(e.data);
+      const progress = parseFloat(data.progress) || 0;
+      updateBarProgress(progress);
+      if (progress >= 1) {
+        console.log("Processing complete.");
+        socket.close();
+      }
+    };
+
+    socket.onerror = function (e) {
+      console.error("WebSocket error:", e);
+    };
+
+    socket.onclose = function (e) {
+      console.log("WebSocket connection closed.");
+    };
+
+    function updateBarProgress(value) {
+      progressBar.style.width = `${value * 100}%`;
+      progressBar.textContent = `${(value * 100).toFixed(1)}%`;
     }
-
-
-    const updateBarProgress = (value) => {
-        const progressBar = document.getElementById('progress-bar');
-        progressBar.style.width = `${value * 100}%`;
-        progressBar.textContent = `${(value * 100).toFixed(1)}%`;
-    }
-
-</script>
+  </script>
 
 </body>
 </html>

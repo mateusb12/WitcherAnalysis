@@ -1,4 +1,7 @@
 import pandas as pd
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from django.core.cache import cache
 from spacy.tokens import Doc
 
 from nlp_processing.entity_analysis.entity_extractor import EntityExtractor
@@ -7,6 +10,23 @@ from nlp_processing.entity_analysis.relationship_creator import RelationshipCrea
 from nlp_processing.entity_analysis.text_processor import TextProcessor
 from nlp_processing.model_loader import load_nlp_model
 from utils.entity_utils import filter_entity_df
+
+
+def save_progress(progress, session_key):
+    # Save progress in your cache (if needed)
+    cache.set(f'upload_progress_{session_key}', progress)
+
+    # Get the channel layer
+    channel_layer = get_channel_layer()
+
+    # Send the progress update to the group based on the session key
+    async_to_sync(channel_layer.group_send)(
+        f'progress_{session_key}',
+        {
+            'type': 'progress_update',  # This calls the "progress_update" method in the consumer
+            'progress': progress,
+        }
+    )
 
 
 class EntityNetworkPipeline:
@@ -33,34 +53,30 @@ class EntityNetworkPipeline:
         relationship_df = self.relationship_creator.aggregate_network()
         self.node_plot.set_network_df(relationship_df)
         self.node_plot.plot(book_name=self.book_filename)
-        pass
 
     def get_booK_entity_dataframe(self) -> pd.DataFrame:
         entity_data: Doc = self.text_processor.analyze_book_from_text_data(self.text_data)
-
         sentences = list(entity_data.sents)
         total = len(sentences)
-
         processed_spans = []
 
         for idx, sent in enumerate(sentences):
             processed_spans.append(sent)
-
-            # Report progress every 10 sentences (you can tweak this)
+            # Report progress every 10 sentences (or adjust as needed)
             if self.progress_callback and idx % 10 == 0:
                 progress = (idx + 1) / total
                 self.progress_callback(progress)
 
         # Reconstruct the Doc object with processed sentences
         entity_data = Doc(entity_data.vocab, words=[token.text for sent in processed_spans for token in sent])
-
         self.entity_extractor.setup_entity_data(entity_data)
         return self.entity_extractor.extract_book_entities()
 
     def filter_entity_dataframe(self, entity_df: pd.DataFrame) -> pd.DataFrame:
-        # Filter the entity dataframe using the character table
         entity_df['entities'] = entity_df['entities'].apply(filter_entity_df, characters_df=self.character_table)
         return entity_df
+
+
 
 
 def main():

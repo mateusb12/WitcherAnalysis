@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -8,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.cache import cache  # NEW: import cache
 
 from nlp_processing.entity_network_from_filedata import EntityNetworkPipeline
 from utils.csv_utils import convert_string_to_dataframe
@@ -24,16 +24,9 @@ class FileUploadView(APIView):
         serializer = FileUploadSerializer(data=request.data)
 
         if serializer.is_valid():
-            # Retrieve the uploaded files using serializer.validated_data
             txt_file = serializer.validated_data['txt_file']
             csv_file = serializer.validated_data['csv_file']
-
-            # Here, you can now handle the files, such as saving them or processing them
-            # For example:
-            # with open(txt_file.name, 'wb+') as destination:
-            #     for chunk in txt_file.chunks():
-            #         destination.write(chunk)
-
+            # Here, you could save or process the files as needed
             return Response({"message": "Files uploaded successfully"}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -48,8 +41,9 @@ def upload_form(request):
 
 @csrf_exempt
 def upload_books(request):
+    # Instead of saving progress to the session, we save it to the cache.
     def save_progress(progress):
-        request.session['upload_progress'] = progress
+        cache.set(f'upload_progress_{request.session.session_key}', progress)
 
     if request.method == 'POST':
         dict_data = request.POST.dict()
@@ -64,14 +58,14 @@ def upload_books(request):
         entity_processor.analyze_pipeline()
         return HttpResponse(status=204)
     else:
-        # If the request method is not POST, return an appropriate HTTP response
         return HttpResponse(status=405)
 
 
 @csrf_exempt
 def progress_update_view(request):
     if request.method == 'POST':
-        progress = request.session.get('upload_progress', 0)
+        # Retrieve progress from the cache.
+        progress = cache.get(f'upload_progress_{request.session.session_key}', 0)
         return JsonResponse({'progress': progress})
     else:
         return HttpResponse(status=405)
