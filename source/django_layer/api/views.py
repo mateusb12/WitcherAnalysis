@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.cache import cache  # NEW: import cache
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 from nlp_processing.entity_network_from_filedata import EntityNetworkPipeline
 from utils.csv_utils import convert_string_to_dataframe
@@ -33,6 +35,9 @@ class FileUploadView(APIView):
 
 
 def upload_form(request):
+    if not request.session.session_key:
+        request.session['initialized'] = True
+
     form_location = os.path.join(settings.BASE_DIR, 'static', 'upload_component.html')
     print(form_location)
     with open(form_location, 'r') as file:
@@ -41,9 +46,16 @@ def upload_form(request):
 
 @csrf_exempt
 def upload_books(request):
-    # Instead of saving progress to the session, we save it to the cache.
+    # Instead of saving progress to the session, we save it to the cache and send via WebSocket.
+    channel_layer = get_channel_layer()
+    group_name = f'progress_{request.session.session_key}'
+
     def save_progress(progress):
         cache.set(f'upload_progress_{request.session.session_key}', progress)
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {"type": "progress_update", "progress": progress}
+        )
 
     if request.method == 'POST':
         dict_data = request.POST.dict()
