@@ -4,8 +4,8 @@ from pathlib import Path
 
 from spacy.tokens import Doc
 
-from source.path_reference.folder_reference import get_cache_path, get_nlp_cache_path
-from source.utils.entity_utils import cache_file_exists, save_cache_file
+from path_reference.folder_reference import get_cache_path, get_nlp_cache_path
+from utils.entity_utils import cache_file_exists, save_cache_file
 
 CHUNK_SIZE = 500000
 TEXT_SIZE = 1000000

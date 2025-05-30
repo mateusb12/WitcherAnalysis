@@ -8,8 +8,8 @@ import requests
 from django.urls import reverse
 from spacy.tokens import Doc
 
-from source.data.cache.cache_loader import existing_nlp_cache, NLP_CACHE_PATH
-from source.path_reference.folder_reference import get_books_path, get_book_entities_path, get_nlp_cache_path
+from data.cache.cache_loader import existing_nlp_cache, NLP_CACHE_PATH
+from path_reference.folder_reference import get_books_path, get_book_entities_path, get_nlp_cache_path
 
 
 def list_all_book_files(input_series: str) -> list[Path]:

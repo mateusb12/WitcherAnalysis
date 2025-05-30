@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from source.path_reference.folder_reference import get_cache_path
+from path_reference.folder_reference import get_cache_path
 
 NLP_CACHE_PATH = Path(get_cache_path(), "nlp_cache")
 RELATIONSHIP_CACHE_PATH = Path(get_cache_path(), "relationship_cache")

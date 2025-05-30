@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from source.path_reference.folder_reference import get_data_path, get_books_path, get_books_entities_path, \
+from path_reference.folder_reference import get_data_path, get_books_path, get_books_entities_path, \
     get_character_table_path
-from source.utils.entity_utils import filter_entity_df
+from utils.entity_utils import filter_entity_df
 
 
 class EntityFilter:

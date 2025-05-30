@@ -14,3 +14,4 @@ scripts/witcher.html
 /source/data/books_entities/**/*.csv
 /.idea/
 /repomix-output.md
+/source/.env

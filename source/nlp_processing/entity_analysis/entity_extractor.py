@@ -5,8 +5,8 @@ from typing import Optional
 
 import pandas as pd
 from spacy.tokens import Doc
-from source.utils.entity_utils import extract_entities, print_progress, get_entities_file_path
-from source.utils.folder_utils import handle_new_folder
+from utils.entity_utils import extract_entities, print_progress, get_entities_file_path
+from utils.folder_utils import handle_new_folder
 
 
 class EntityExtractor:
