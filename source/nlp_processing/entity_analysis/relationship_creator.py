@@ -10,6 +10,8 @@ class RelationshipCreator:
         self.window_size: int = 5
 
     def set_entity_df(self, input_df: pd.DataFrame) -> None:
+        if "entities" not in input_df.columns:
+            raise ValueError("The input DataFrame must contain an 'entities' column.")
         self.entity_df = input_df
 
     def __extract_relationships_from_entities(self) -> pd.DataFrame:

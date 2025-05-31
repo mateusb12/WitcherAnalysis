@@ -1,4 +1,6 @@
 import pandas as pd
+import os
+import django
 
 from source.nlp_processing.entity_analysis.book_manager import BookManager
 from source.nlp_processing.entity_analysis.entity_filter import EntityFilter
@@ -49,6 +51,9 @@ class Runner:
 
 
 def __main():
+    # Setup Django settings for standalone script
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_layer.project_config')
+    django.setup()
     r = Runner("witcher")
     r.set_book(4)
     r.book_pipeline()

@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 from django.urls import reverse
 from spacy.tokens import Doc
+from django.urls.exceptions import NoReverseMatch
 
 from data.cache.cache_loader import existing_nlp_cache, NLP_CACHE_PATH
 from path_reference.folder_reference import get_books_path, get_book_entities_path, get_nlp_cache_path
@@ -49,13 +50,19 @@ def print_progress(index, size, time_start):
         print(
             f"Processing sentence {index} of {size} ({percentage}%), speed: {round(speed, 2)} sentences/s,"
             f" ETA {eta_str}")
-        progress_bar_callback(percentage)
+        if 'DJANGO_SETTINGS_MODULE' in os.environ:
+            progress_bar_callback(percentage)
 
 
 def progress_bar_callback(percentage):
-    progress_url = reverse('progress_update_view')
-    full_url = 'http://127.0.0.1:8000' + progress_url
-    requests.post(full_url, data={'progress': percentage})
+    if 'DJANGO_SETTINGS_MODULE' not in os.environ:
+        return  # Skip callback if not running in a Django environment
+    try:
+        progress_url = reverse('progress_update_view')
+        full_url = 'http://127.0.0.1:8000' + progress_url
+        requests.post(full_url, data={'progress': percentage})
+    except NoReverseMatch:
+        print("Warning: 'progress_update_view' not found. Skipping progress update.")
 
 
 def cast_to_str(list_obj: list) -> str:
