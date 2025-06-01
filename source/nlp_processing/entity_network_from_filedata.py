@@ -77,8 +77,6 @@ class EntityNetworkPipeline:
         return entity_df
 
 
-
-
 def main():
     pass
 

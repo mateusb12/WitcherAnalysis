@@ -266,6 +266,8 @@
   <script>
     // Array to store uploaded file info
     let uploadedFiles = [];
+    // WebSocket variable
+    let progressSocket = null;
 
     // -------------------------------
     // File Upload & Drag and Drop Code
@@ -369,57 +371,94 @@
     setupTrashIcon();
 
     // -------------------------------
-    // AJAX File Upload Function
+    // WebSocket Progress Bar Functions
     // -------------------------------
     function sendAjaxRequestToDjango() {
-      let xhr = new XMLHttpRequest();
-      xhr.open('POST', '/upload_books/', true);
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      let txtFile = uploadedFiles.find(file => file.filename.endsWith('.txt'));
-      let csvFile = uploadedFiles.find(file => file.filename.endsWith('.csv'));
-      let txtData = `txt_filename=${encodeURIComponent(txtFile.filename)}&txt_filesize=${txtFile.filesize}&txt_contents=${encodeURIComponent(txtFile.contents)}`;
-      let csvData = `csv_filename=${encodeURIComponent(csvFile.filename)}&csv_filesize=${csvFile.filesize}&csv_contents=${encodeURIComponent(csvFile.contents)}`;
-      let mergedData = `${txtData}&${csvData}`;
-      console.log('Data being sent:', mergedData);
-      xhr.onload = function () {
-        console.log("Upload request complete, processing started.");
-        // Processing progress updates will now come via WebSocket.
+      const submitButton = document.getElementById('submit-button');
+      submitButton.disabled = true;
+
+      // Reset progress bar state
+      updateBarProgress(0); // Reset to 0%
+
+      console.log("Attempting to connect to WebSocket for progress updates...");
+
+      // Check if we have files uploaded - you can re-enable this if needed
+      const txtFile = uploadedFiles.find(file => file.filename.endsWith('.txt'));
+      const csvFile = uploadedFiles.find(file => file.filename.endsWith('.csv'));
+
+      if (!txtFile || !csvFile) {
+        alert("Please upload both a .txt book file and a .csv character table.");
+        submitButton.disabled = false;
+        return;
+      }
+
+      // Initialize WebSocket connection
+      // Adjust the URL to your WebSocket endpoint
+      progressSocket = new WebSocket('ws://' + window.location.host + '/ws/progress/');
+
+      progressSocket.onopen = function(e) {
+        console.log("WebSocket connection established.");
+        // You can send a message to the backend to start the process if needed
+        // For example: progressSocket.send(JSON.stringify({ 'action': 'start_processing' }));
+        // For now, we assume the backend starts sending progress upon connection or after receiving files.
       };
-      xhr.send(mergedData);
+
+      progressSocket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.progress !== undefined) {
+          console.log("Progress update received:", data.progress);
+          updateBarProgress(data.progress);
+
+          if (data.progress >= 100) {
+            console.log("Processing complete according to WebSocket.");
+            progressSocket.close();
+            // fakeProgressComplete(); // We'll adapt this
+            setTimeout(() => {
+                alert("Analysis completed successfully!");
+                submitButton.disabled = false;
+            }, 500);
+          }
+        }
+        if (data.message) {
+            console.log("Message from server:", data.message)
+        }
+      };
+
+      progressSocket.onclose = function(event) {
+        console.log("WebSocket connection closed.", event.reason);
+        // Re-enable the button if the process wasn't completed
+        if (document.getElementById('progress-bar').textContent !== 'Complete!') {
+            submitButton.disabled = false;
+            // Optionally, show a message that the connection was closed
+            // alert("Connection to server lost. Please try again.");
+        }
+      };
+
+      progressSocket.onerror = function(error) {
+        console.error("WebSocket error:", error);
+        alert("Failed to connect for progress updates. Please ensure the backend server is running and accessible.");
+        submitButton.disabled = false;
+        updateBarProgress(0); // Reset progress bar on error
+      };
     }
 
     // -------------------------------
-    // WebSocket for Progress Updates
+    // Progress Bar Update Function
     // -------------------------------
-    const progressBar = document.getElementById('progress-bar');
-    // Use ws:// for HTTP and wss:// for HTTPS
-    const socket = new WebSocket(`ws://${window.location.host}/ws/progress/`);
+    function updateBarProgress(percentage) { // percentage is 0-100
+      const progressBar = document.getElementById('progress-bar');
+      const value = Math.min(Math.max(percentage, 0), 100); // Ensure value is between 0 and 100
 
-    socket.onopen = function (e) {
-      console.log("WebSocket connection established.");
-    };
+      progressBar.style.width = `${value}%`;
+      progressBar.textContent = `${value.toFixed(1)}%`;
 
-    socket.onmessage = function (e) {
-      const data = JSON.parse(e.data);
-      const progress = parseFloat(data.progress) || 0;
-      updateBarProgress(progress);
-      if (progress >= 1) {
-        console.log("Processing complete.");
-        socket.close();
+      // Change progress bar color as it completes
+      if (value >= 100) {
+        progressBar.style.backgroundColor = '#4CAF50'; // Brighter green when complete
+        progressBar.textContent = 'Complete!';
+      } else {
+        progressBar.style.backgroundColor = '#87c6a3'; // Default soft green
       }
-    };
-
-    socket.onerror = function (e) {
-      console.error("WebSocket error:", e);
-    };
-
-    socket.onclose = function (e) {
-      console.log("WebSocket connection closed.");
-    };
-
-    function updateBarProgress(value) {
-      progressBar.style.width = `${value * 100}%`;
-      progressBar.textContent = `${(value * 100).toFixed(1)}%`;
     }
   </script>
 

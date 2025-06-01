@@ -45,34 +45,180 @@
     </div>
 </div>
 
-<button onClick="upload()">Upload</button>
+<button onClick="startUploadProcess()">Upload</button>
 <script>
-const upload = () => {
-    const progressBar = document.getElementById('progress-bar');
-    let completionTimeSeconds = 5;
-    let intervalTimeMs = 50;
-    let updates = (completionTimeSeconds * 1000) / intervalTimeMs;
-    let increment = 1 / updates;
+let currentProgress = 0; // Initialize at 0%
+const progressBar = document.getElementById('progress-bar');
+let socket = null; // Will hold our WebSocket connection
 
-    let progress = 0;
-    const interval = setInterval(() => {
-        if (progress + increment > 1) {
-            updateBarProgress(1);
-            clearInterval(interval);
-        } else {
-            progress += increment;
-            updateBarProgress(progress);
+// Call this function when you want to start the process that sends progress
+function startUploadProcess() {
+    // Reset progress if starting again
+    currentProgress = 0;
+    updateBarProgress(currentProgress);
+
+    // Close existing WebSocket if it's open
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close();
+    }
+
+    // Initialize WebSocket connection
+    connectWebSocket();
+
+    // This is where you can trigger the backend process that will update progress
+    triggerBackendProcess();
+
+    console.log("Upload process started. Waiting for progress updates via WebSocket...");
+}
+
+function connectWebSocket() {
+    // Create WebSocket connection
+    // Update the URL based on your Django WebSocket consumer URL
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsHost = window.location.host; // Will get current domain:port
+    socket = new WebSocket(`${wsProtocol}//${wsHost}/ws/progress/`);
+
+    // WebSocket event handlers
+    socket.onmessage = function(event) {
+        try {
+            // Parse the message from the backend
+            const messageData = JSON.parse(event.data);
+
+            // Handle different message formats
+            let progressValue = null;
+            let incrementValue = 0;
+
+            // Case 1: Backend sends direct percentage {"progress": 45}
+            if (messageData && typeof messageData.progress === 'number') {
+                progressValue = messageData.progress;
+                updateBarProgress(progressValue);
+            }
+            // Case 2: Backend sends increment {"increment": 10}
+            else if (messageData && typeof messageData.increment === 'number') {
+                incrementValue = messageData.increment;
+                currentProgress += incrementValue;
+                if (currentProgress > 100) currentProgress = 100;
+                updateBarProgress(currentProgress);
+            }
+            // Case 3: Backend sends completion flag
+            else if (messageData && messageData.complete === true) {
+                updateBarProgress(100);
+                console.log("Processing complete!");
+            }
+
+            if (currentProgress >= 100) {
+                console.log("Processing complete!");
+                // No need to close socket - backend might send additional messages
+            }
+        } catch (e) {
+            console.error("Error processing WebSocket message:", event.data, e);
         }
-    }, intervalTimeMs)
+    };
+
+    socket.onopen = function(event) {
+        console.log("WebSocket connection established.");
+    };
+
+    socket.onclose = function(event) {
+        console.log("WebSocket connection closed.");
+        if (currentProgress < 100) {
+            progressBar.textContent = "Connection lost";
+        }
+    };
+
+    socket.onerror = function(error) {
+        console.error("WebSocket error:", error);
+        progressBar.textContent = "Connection error";
+    };
 }
 
-const updateBarProgress = (value) => {
-    const progressBar = document.getElementById('progress-bar');
-    progressBar.style.width = `${value * 100}%`;
-    progressBar.textContent = `${(value * 100).toFixed(1)}%`;
+// Function to trigger the backend process
+function triggerBackendProcess() {
+    // You can use fetch or AJAX to start your backend process
+    fetch('/api/start-process/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(), // Function to get Django CSRF token
+        },
+        body: JSON.stringify({
+            // Any parameters your backend process needs
+            action: 'start_processing'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Process started on backend:", data);
+    })
+    .catch(error => {
+        console.error("Error starting process:", error);
+        progressBar.textContent = "Failed to start process";
+    });
 }
 
+// Helper function to get the CSRF token from cookies
+function getCsrfToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 'csrftoken='.length) === 'csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
+const updateBarProgress = (percentage) => {
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+        progressBar.textContent = percentage.toFixed(1) + '%';
+        if (percentage >= 100) {
+            progressBar.textContent = 'Complete!';
+        }
+    }
+}
+
+// Add a fallback for testing when WebSocket is not available
+function enableTestMode() {
+    console.log("Test mode enabled. Using simulated progress updates.");
+    let simulatedIncrements = [10, 15, 20, 25, 30];
+    let index = 0;
+    const simInterval = setInterval(() => {
+        if (index < simulatedIncrements.length) {
+            const increment = simulatedIncrements[index++];
+            currentProgress += increment;
+            if (currentProgress > 100) {
+                currentProgress = 100;
+            }
+            updateBarProgress(currentProgress);
+
+            if (currentProgress >= 100) {
+                console.log("Processing complete via simulation!");
+                clearInterval(simInterval);
+            }
+        } else {
+            clearInterval(simInterval);
+            if (currentProgress < 100) {
+                updateBarProgress(100);
+                console.log("Processing complete via simulation (final step)!");
+            }
+        }
+    }, 1000);
+}
+
+// For debugging - uncomment to test without WebSocket
+// window.addEventListener('load', function() {
+//     document.getElementById('test-mode-button').addEventListener('click', enableTestMode);
+// });
 </script>
+
+<!-- Uncomment for debugging
+<button id="test-mode-button">Test Mode</button>
+-->
 </body>
 </html>
+

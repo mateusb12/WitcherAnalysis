@@ -33,14 +33,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',
-    'django_layer.api.apps.ApiConfig'
+    'rest_framework', # If you are using Django REST framework
+    'django_layer.api', # Corrected app reference
 ]
 
 MIDDLEWARE = [
@@ -72,7 +73,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = f'{BASE_FOLDER}.wsgi.application'
-ASGI_APPLICATION = f'{BASE_FOLDER}.asgi.application'
+ASGI_APPLICATION = 'django_layer.character_net.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {

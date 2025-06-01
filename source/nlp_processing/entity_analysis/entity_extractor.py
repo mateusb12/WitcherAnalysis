@@ -5,6 +5,7 @@ from typing import Optional
 
 import pandas as pd
 from spacy.tokens import Doc
+import spacy
 from utils.entity_utils import extract_entities, print_progress, get_entities_file_path
 from utils.folder_utils import handle_new_folder
 
@@ -19,6 +20,13 @@ class EntityExtractor:
         self.series_tag: str = "harry_potter"
 
     def set_information(self, book: Doc, file: Path, series: str):
+        # Ensure sentence boundaries are set for the Doc
+        if not book.has_annotation("SENT_START"):
+            # Load a blank model just to add sentencizer if needed
+            nlp = spacy.blank(book.lang if hasattr(book, 'lang') else 'en')
+            if 'sentencizer' not in nlp.pipe_names:
+                nlp.add_pipe('sentencizer')
+            book = nlp(book.text)
         self.current_book_entities = book
         self.current_file = file
         self.series_tag = series
