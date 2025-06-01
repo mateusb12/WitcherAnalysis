@@ -4,7 +4,7 @@ from nlp_processing.entity_analysis.entity_filter import get_witcher_filtered_df
 from utils.relationship_utils import bidirectional_sort, get_source_target_relationship_list, remove_string_duplicates
 
 
-class RelationshipCreator:
+class RelationshipBuilder:
     def __init__(self):
         self.entity_df = None
         self.window_size: int = 5
@@ -40,7 +40,7 @@ class RelationshipCreator:
 
 
 def get_network_df() -> pd.DataFrame:
-    rc = RelationshipCreator()
+    rc = RelationshipBuilder()
     entity_df = get_witcher_filtered_df()
     rc.set_entity_df(entity_df)
     return rc.aggregate_network()

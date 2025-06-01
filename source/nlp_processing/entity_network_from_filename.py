@@ -6,7 +6,7 @@ from source.data.cache.cache_loader import existing_relationship_cache, existing
 from source.nlp_processing.entity_analysis.book_manager import BookManager
 from source.nlp_processing.entity_analysis.entity_extractor import EntityExtractor
 from source.nlp_processing.entity_analysis.entity_filter import EntityFilter
-from source.nlp_processing.entity_analysis.relationship_creator import RelationshipCreator
+from source.nlp_processing.entity_analysis.relationship_creator import RelationshipBuilder
 from source.nlp_processing.model_loader import load_nlp_model
 
 
@@ -15,7 +15,7 @@ class BooKEntityNetworkBuilder:
         self.book_manager = BookManager(nlp_model, series_tag)
         self.entity_extractor = EntityExtractor()
         self.entity_filter = EntityFilter(series=series_tag)
-        self.relationship_creator = RelationshipCreator()
+        self.relationship_creator = RelationshipBuilder()
         self.book_title: str = ""
         self.book_index: int = 0
 

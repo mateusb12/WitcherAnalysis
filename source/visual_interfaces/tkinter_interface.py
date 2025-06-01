@@ -83,8 +83,8 @@ class BookSelector:
         existing_book = retrieve_book(chosen_book)
         if not existing_book:
             new_wrapper = Runner(series=chosen_series)
-            new_wrapper.set_book(book_number)
-            new_wrapper.book_pipeline()
+            new_wrapper.load_book(book_number)
+            new_wrapper.process_entities()
             new_wrapper.plot()
 
     def execute_first_dropdown(self, value):

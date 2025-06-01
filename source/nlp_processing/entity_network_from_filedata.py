@@ -6,7 +6,7 @@ from spacy.tokens import Doc
 
 from nlp_processing.entity_analysis.entity_extractor import EntityExtractor
 from nlp_processing.entity_analysis.node_plot import NodePlot
-from nlp_processing.entity_analysis.relationship_creator import RelationshipCreator
+from nlp_processing.entity_analysis.relationship_creator import RelationshipBuilder
 from nlp_processing.entity_analysis.text_processor import TextProcessor
 from nlp_processing.model_loader import load_nlp_model
 from utils.entity_utils import filter_entity_df
@@ -34,7 +34,7 @@ class EntityNetworkPipeline:
         self.model = load_nlp_model()
         self.text_processor = TextProcessor(self.model)
         self.entity_extractor = EntityExtractor()
-        self.relationship_creator = RelationshipCreator()
+        self.relationship_creator = RelationshipBuilder()
         self.node_plot = NodePlot()
         self.text_data: str = ""
         self.character_table: pd.DataFrame = pd.DataFrame()

@@ -101,12 +101,12 @@ class CharacterImportanceOverTime:
             return
         w = Runner(series=self.series_name)
         for i in missing_books:
-            w.set_book(i)
+            w.load_book(i)
             book_name = w.book_name
             csv_output = Path(self.series_importance_folder, f"{book_name}_importance.csv")
             if Path(csv_output).is_file():
                 continue
-            relationship_df = w.book_pipeline()
+            relationship_df = w.process_entities()
             relationship_df.to_csv(csv_output, index=True, encoding="utf-8")
 
 
