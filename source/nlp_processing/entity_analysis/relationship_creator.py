@@ -10,8 +10,8 @@ class RelationshipBuilder:
         self.window_size: int = 5
 
     def set_entity_df(self, input_df: pd.DataFrame) -> None:
-        if "entities" not in input_df.columns:
-            raise ValueError("The input DataFrame must contain an 'entities' column.")
+        if "character_entities" not in input_df.columns:
+            raise ValueError("The input DataFrame must contain an 'character_entities' column.")
         self.entity_df = input_df
 
     def __extract_relationships_from_entities(self) -> pd.DataFrame:
@@ -22,7 +22,7 @@ class RelationshipBuilder:
         for i in range(self.entity_df.index[-1]):
             window_end = min(i + self.window_size, maximum_df_index)
             window = self.entity_df.loc[i:i + window_end]
-            window_characters = sum(window.entities, [])
+            window_characters = sum(window.character_entities, [])
             unique_characters = remove_string_duplicates(window_characters)
             relationships = get_source_target_relationship_list(unique_characters)
             relationship_pot.extend(relationships)

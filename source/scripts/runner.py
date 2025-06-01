@@ -32,6 +32,7 @@ class Runner:
 
     def process_entities(self) -> pd.DataFrame:
         print("2/3 (Entity processing)")
+
         entity_df = self.book_analyser.get_book_entities()
         self.entity_filter.set_entity_df(entity_df)
         filtered_df = self.entity_filter.export_filtered_dataframe()
