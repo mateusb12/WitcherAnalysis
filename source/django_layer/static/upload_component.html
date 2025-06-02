@@ -379,6 +379,7 @@
 
       // Reset progress bar state
       updateBarProgress(0); // Reset to 0%
+      let currentProgress = 0; // Initialize currentProgress for this session
 
       console.log("Attempting to connect to WebSocket for progress updates...");
 
@@ -405,22 +406,36 @@
 
       progressSocket.onmessage = function(event) {
         const data = JSON.parse(event.data);
-        if (data.progress !== undefined) {
-          console.log("Progress update received:", data.progress);
-          updateBarProgress(data.progress);
 
-          if (data.progress >= 100) {
-            console.log("Processing complete according to WebSocket.");
-            progressSocket.close();
-            // fakeProgressComplete(); // We'll adapt this
-            setTimeout(() => {
-                alert("Analysis completed successfully!");
-                submitButton.disabled = false;
-            }, 500);
-          }
+        if (data.increment !== undefined) {
+          currentProgress += data.increment;
+          currentProgress = Math.min(currentProgress, 100); // Cap at 100
+          // Round to one decimal place for consistent internal state
+          currentProgress = parseFloat(currentProgress.toFixed(1));
+          console.log("Progress incrementally updated by:", data.increment, "Current:", currentProgress);
+          updateBarProgress(currentProgress);
+        } else if (data.progress !== undefined) {
+          currentProgress = data.progress;
+          console.log("Progress explicitly updated to:", data.progress);
+          updateBarProgress(data.progress);
         }
+
+        // Check for completion based on currentProgress
+        if (currentProgress >= 100) {
+          console.log("Processing complete according to WebSocket.");
+          updateBarProgress(100); // Ensure UI shows 100% and "Complete!" text
+          if (progressSocket && progressSocket.readyState === WebSocket.OPEN) {
+             progressSocket.close();
+          }
+          setTimeout(() => {
+              alert("Analysis completed successfully!");
+              // const submitButton = document.getElementById('submit-button'); // Already defined in this function's scope
+              if (submitButton) submitButton.disabled = false;
+          }, 500);
+        }
+
         if (data.message) {
-            console.log("Message from server:", data.message)
+            console.log("Message from server:", data.message);
         }
       };
 
