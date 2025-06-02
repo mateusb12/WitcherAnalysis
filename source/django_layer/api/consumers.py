@@ -1,28 +1,14 @@
 import asyncio
 import json
 import logging
+import webbrowser
+from pathlib import Path
 from channels.generic.websocket import AsyncWebsocketConsumer
 from scripts.runner import Runner
+from path_reference.folder_reference import get_book_graphs_path
 
 logger = logging.getLogger(__name__)
 
-
-# Ensure logger is configured to output, e.g., in Django settings:
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'loggers': {
-#         'django_layer.api.consumers': { # Updated to match typical app structure if __name__ is 'django_layer.api.consumers'
-#             'handlers': ['console'],
-#             'level': 'INFO',
-#         },
-#     },
-# }
 
 class ProgressConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -30,18 +16,15 @@ class ProgressConsumer(AsyncWebsocketConsumer):
         logger.info(f"WebSocket connect: client={self.client_info}")
         await self.accept()
         logger.info(f"WebSocket accepted: client={self.client_info}. Waiting for 'start_processing' message.")
-        # The processing is now triggered by a message in receive()
 
     async def disconnect(self, close_code):
         logger.info(f"WebSocket disconnect: client={self.client_info}, code={close_code}")
-        # Add any cleanup if tasks were stored on self, though run_book_processing is self-contained.
         pass
 
     async def run_book_processing(self, series_name, book_num):
         try:
             logger.info(f"Runner: Initializing for {series_name}, book {book_num}. Client: {self.client_info}")
             runner = Runner(series=series_name)
-            # No direct message for initialization, or make it very brief if added.
 
             logger.info(f"Runner: Loading book {book_num}. Client: {self.client_info}")
             await self.send(text_data=json.dumps({'increment': 5.0, 'message': f'Loading book {book_num}...'}))
@@ -75,20 +58,31 @@ class ProgressConsumer(AsyncWebsocketConsumer):
             runner.node_plot.set_network_df(relationship_df)  # Assuming this is fast
             await asyncio.to_thread(runner.node_plot.pipeline)
             logger.info(f"Runner: Network pipeline complete. Client: {self.client_info}")
-            await self.send(text_data=json.dumps({'increment': 20.0, 'message': 'Network analysis pipeline complete.'}))
+            await self.send(text_data=json.dumps({'increment': 15.0, 'message': 'Network analysis pipeline complete.'}))
             await asyncio.sleep(0.1)
 
-            # If runner.plot() is part of the process and generates a file/result:
-            # logger.info(f"Runner: Plotting network. Client: {self.client_info}")
-            # await self.send(text_data=json.dumps({'increment': 4.0, 'message': 'Generating plot...'}))
-            # await asyncio.to_thread(runner.plot)
-            # logger.info(f"Runner: Plotting complete. Client: {self.client_info}")
-            # await self.send(text_data=json.dumps({'increment': 1.0, 'message': 'Plot generated.'})) # Total 5% for plot
-            # await asyncio.sleep(0.1)
-            # Note: Current increments (5+5+5+20+20+20+20 = 95) are fine.
+            logger.info(
+                f"Runner: Generating and opening plot for book '{runner.book_name}'. Client: {self.client_info}")
+            await self.send(text_data=json.dumps({'increment': 5.0, 'message': 'Generating visualization...'}))
+            await asyncio.to_thread(runner.plot)
+
+            html_file_path = Path(get_book_graphs_path(), f"{runner.book_name}.html")
+            logger.info(f"HTML file path: {html_file_path}")
 
             logger.info(f"Runner: Analysis complete. Sending final progress. Client: {self.client_info}")
             await self.send(text_data=json.dumps({'progress': 100, 'message': 'Analysis fully complete!'}))
+
+            if html_file_path.exists():
+                webbrowser.open_new_tab(html_file_path.as_uri())
+                logger.info(f"Opened HTML file in browser: {html_file_path}. Client: {self.client_info}")
+                await self.send(text_data=json.dumps({
+                    'message': 'Character network visualization opened in a new browser tab.'
+                }))
+            else:
+                logger.warning(f"HTML file not found at: {html_file_path}. Client: {self.client_info}")
+                await self.send(text_data=json.dumps({
+                    'message': 'Note: Could not find the generated visualization file.'
+                }))
 
         except Exception as e:
             logger.error(f"Error during book processing for client={self.client_info}: {e}", exc_info=True)
