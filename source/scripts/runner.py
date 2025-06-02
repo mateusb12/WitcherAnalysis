@@ -2,10 +2,10 @@ import pandas as pd
 import os
 import django
 
-from source.nlp_processing.entity_analysis.book_manager import BookManager
-from source.nlp_processing.entity_analysis.entity_filter import EntityFilter
-from source.nlp_processing.model_loader import load_nlp_model
-from source.nlp_processing.entity_analysis.relationship_creator import RelationshipBuilder
+from nlp_processing.entity_analysis.book_manager import BookManager
+from nlp_processing.entity_analysis.entity_filter import EntityFilter
+from nlp_processing.model_loader import load_nlp_model
+from nlp_processing.entity_analysis.relationship_creator import RelationshipBuilder
 from nlp_processing.entity_analysis.node_plot import NodePlot
 
 

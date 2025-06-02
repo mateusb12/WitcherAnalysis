@@ -399,9 +399,19 @@
 
       progressSocket.onopen = function(e) {
         console.log("WebSocket connection established.");
-        // You can send a message to the backend to start the process if needed
-        // For example: progressSocket.send(JSON.stringify({ 'action': 'start_processing' }));
-        // For now, we assume the backend starts sending progress upon connection or after receiving files.
+        // Send a message to the backend to start the process
+        // Ensure txtFile and csvFile are accessible here or pass them appropriately
+        const txtFile = uploadedFiles.find(file => file.filename.endsWith('.txt'));
+        const csvFile = uploadedFiles.find(file => file.filename.endsWith('.csv'));
+
+        progressSocket.send(JSON.stringify({
+          'action': 'start_processing',
+          'files': {
+            'txt': txtFile ? txtFile.filename : null,
+            'csv': csvFile ? csvFile.filename : null
+          }
+        }));
+        console.log("Sent 'start_processing' message to backend."); // Added log
       };
 
       progressSocket.onmessage = function(event) {
