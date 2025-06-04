@@ -12,10 +12,18 @@ logger = logging.getLogger(__name__)
 
 class ProgressConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        logger.info("ProgressConsumer.connect() method called")
+        logger.info(f"Scope: {self.scope}")
+        logger.info("Attempting to accept WebSocket connection")
         self.client_info = self.scope.get('client')
         logger.info(f"WebSocket connect: client={self.client_info}")
-        await self.accept()
-        logger.info(f"WebSocket accepted: client={self.client_info}. Waiting for 'start_processing' message.")
+        try:
+            await self.accept()
+            logger.info("WebSocket connection accepted successfully")
+            logger.info(f"WebSocket accepted: client={self.client_info}. Waiting for 'start_processing' message.")
+        except Exception as e:
+            logger.error(f"Exception during WebSocket connection: {e}", exc_info=True)
+            raise
 
     async def disconnect(self, close_code):
         logger.info(f"WebSocket disconnect: client={self.client_info}, code={close_code}")
