@@ -6,10 +6,9 @@ Before embarking on any significant refactoring, it's paramount to have a robust
 
 ### Testing Checklists
 #### Unit Test Files Checklist
-- [ ] `source/tests/unit/test_serializers.py` - For testing serializers like FileUploadSerializer
-- [ ] `source/tests/unit/test_utils.py` - For testing utility functions in utils modules
-- [ ] `source/tests/unit/test_runner.py` - For testing Runner class components
-- [ ] `source/tests/unit/test_entity_network.py` - For testing EntityNetworkPipeline components
+- [x] `source/tests/unit/test_serializers.py` - For testing serializers like FileUploadSerializer
+- [x] `source/tests/unit/test_utils.py` - For testing utility functions in utils modules
+- [x] `source/tests/unit/test_entity_network.py` - For testing EntityNetworkPipeline components
 - [ ] `source/tests/unit/test_consumer_logic.py` - For testing isolated consumer logic
 
 #### Integration Test Files Checklist

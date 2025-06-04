@@ -74,6 +74,7 @@ class EntityNetworkPipeline:
 
     def filter_entity_dataframe(self, entity_df: pd.DataFrame) -> pd.DataFrame:
         entity_df['entities'] = entity_df['entities'].apply(filter_entity_df, characters_df=self.character_table)
+        entity_df = entity_df.rename(columns={'entities': 'character_entities'})
         return entity_df
 
 
