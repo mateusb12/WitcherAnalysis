@@ -29,7 +29,7 @@ class ProgressConsumer(AsyncWebsocketConsumer):
         logger.info(f"WebSocket disconnect: client={self.client_info}, code={close_code}")
         pass
 
-    async def run_book_processing(self, series_name, book_num):
+    async def run_book_processing(self, series_name, book_num, open_html=False):
         try:
             logger.info(f"Runner: Initializing for {series_name}, book {book_num}. Client: {self.client_info}")
             runner = Runner(series=series_name)
@@ -80,7 +80,7 @@ class ProgressConsumer(AsyncWebsocketConsumer):
             logger.info(f"Runner: Analysis complete. Sending final progress. Client: {self.client_info}")
             await self.send(text_data=json.dumps({'progress': 100, 'message': 'Analysis fully complete!'}))
 
-            if html_file_path.exists():
+            if html_file_path.exists() and open_html:
                 webbrowser.open_new_tab(html_file_path.as_uri())
                 logger.info(f"Opened HTML file in browser: {html_file_path}. Client: {self.client_info}")
                 await self.send(text_data=json.dumps({
