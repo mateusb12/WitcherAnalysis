@@ -58,7 +58,10 @@ class NodePlot:
         self.pipeline()
         self.net = Network(notebook=False, width="2000px", height="1400px", bgcolor="#222222", font_color="white")
         self.net.from_nx(self.G)
+
+        # Ensure the patched path is used
         book_path = Path(get_book_graphs_path(), f"{book_name}.html")
+        print(f"Saving plot to: {book_path}")  # Debugging statement
         self.net.show(str(book_path), notebook=False)
 
     def get_centrality(self, input_type: Centrality = Centrality.degree) -> dict or None:

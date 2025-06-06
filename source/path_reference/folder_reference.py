@@ -41,7 +41,9 @@ def get_runner_path():
 
 
 def get_book_graphs_path():
-    return Path(get_runner_path(), 'book_graphs')
+    path = Path(get_runner_path(), 'book_graphs')
+    print(f"get_book_graphs_path called, returning: {path}")  # Debugging statement
+    return path
 
 
 def get_cache_path() -> Path:
