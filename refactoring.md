@@ -1,153 +1,17 @@
 # Refactoring Guide for Your Django Backend
-This document provides a step-by-step guide to refactor your Django backend, focusing on improving architectural clarity, an_intro_to_clean_architecture_by_victor_savkinanization, and maintainability. It also includes a crucial pre-guide on testing to ensure the refactoring process is smooth and reliable.
+This document provides a step-by-step guide to refactor your Django backend, focusing on improving architectural clarity, clean architecture and maintainability.
 ---
-## Ⅰ. Pre-Guide: Fortifying with Tests
-Before embarking on any significant refactoring, it's paramount to have a robust testing strategy. This ensures that existing functionality isn't broken during the process and provides confidence in the changes made.
 
-### Testing Checklists
-#### Unit Test Files Checklist
-- [x] `source/tests/unit/test_serializers.py` - For testing serializers like FileUploadSerializer
-- [x] `source/tests/unit/test_utils.py` - For testing utility functions in utils modules
-- [x] `source/tests/unit/test_entity_network.py` - For testing EntityNetworkPipeline components
-- [ ] `source/tests/unit/test_consumer_logic.py` - For testing isolated consumer logic
-
-#### Integration Test Files Checklist
-- [ ] `source/tests/integration/test_api_views.py` - For testing API endpoints
-- [ ] `source/tests/integration/test_websocket.py` - For testing WebSocket connections
-- [ ] `source/tests/integration/test_runner_integration.py` - For testing Runner with its dependencies
-- [ ] `source/tests/integration/test_pipeline_integration.py` - For testing complete EntityNetworkPipeline
-
-#### Test Implementation Status
-- [ ] Set up pytest with pytest-django and pytest-asyncio
-- [ ] Configure test settings in `source/tests/conftest.py`
-- [ ] Create test data fixtures in `source/tests/fixtures/`
-- [ ] Set up CI pipeline for automated testing
-
-### 1. Understand What to Test
-Given your project structure, key areas for testing include:
-- **API Endpoints:** Your `api/views.py` defines several endpoints (e.g., file uploads, progress updates).
-- **WebSocket Consumers:** The `ProgressConsumer` in `api/consumers.py` is critical for real-time updates and managing the book processing logic.
-- **Business Logic:** The core operations like `Runner` (in `scripts.runner`) and `EntityNetworkPipeline` (in `nlp_processing.entity_network_from_filedata`), which are called by views and consumers.
-- **Serializers:** Such as `FileUploadSerializer` in `api/serializers.py`.
-- **Models:** (Currently, `api/models.py` is empty, but if you add models, they must be tested).
-### 2. Types of Tests
-#### a. Unit Tests
-- **Purpose:** Test individual components (functions, classes, methods) in isolation.
-- **Focus Areas:**
-- **Serializers:** Test validation logic, data representation.
-- **Helper/Util Functions:** Any utility functions (e.g., in `utils.csv_utils`, `utils.django_utils` if these were visible, or similar custom utilities).
-- **Business Logic Components (mocked dependencies):** Test specific functions within `Runner` or `EntityNetworkPipeline` by mocking external dependencies (like file system access, database calls if any, external APIs).
-- **Consumers (logic parts):** Test message handling logic within `ProgressConsumer` by mocking `self.send` and `asyncio.to_thread` calls.
-- **Tools:** Django's built-in `django.test.TestCase` or `unittest`. `pytest` with `pytest-django` is also a popular choice.
-- **Example (Conceptual for a helper function):**
-```python
-# source/django_layer/api/tests.py
-from django.test import TestCase
-# from ..utils.my_data_processor import process_data # Assuming a utility
-class MyDataProcessorTests(TestCase):
-def test_process_data_logic(self):
-# result = process_data(sample_input)
-# self.assertEqual(result, expected_output)
-pass
-```
-#### b. Integration Tests
-- **Purpose:** Test interactions between components.
-- **Focus Areas:**
-- **View-Serializer Interaction:** Ensure views correctly use serializers for input validation and output formatting.
-- **View-Business Logic Interaction:** Test that views correctly call business logic services/pipelines and handle their responses/exceptions.
-- **Consumer-Business Logic Interaction:** Verify that the `ProgressConsumer` correctly initiates and communicates with the `Runner`/`EntityNetworkPipeline`.
-- **API Endpoint Tests:**
-- Use Django's test client (`django.test.Client`) to make requests to your API endpoints.
-- Verify status codes, response data, and any side effects (e.g., task initiated).
-- For file uploads, use the test client to simulate file uploads.
-- **Tools:** `django.test.TestCase` with `django.test.Client`.
-- **Example (API Endpoint Test):**
-```python
-# source/django_layer/api/tests.py
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient # APITestCase is good for DRF views
-from rest_framework import status
-# from unittest.mock import patch # For mocking background tasks
-class FileUploadIntegrationTests(APITestCase):
-def setUp(self):
-self.client = APIClient()
-self.upload_url = reverse('upload-form') # Or the correct name for your file upload view's URL
-# @patch('source.django_layer.api.views.EntityNetworkPipeline') # Mock the pipeline
-def test_file_upload_initiates_processing(self, mock_pipeline_class):
-# mock_instance = mock_pipeline_class.return_value
-# mock_instance.analyze_pipeline.return_value = None # or some expected result
-# Simulate file upload (adjust based on your actual endpoint: 'upload_books' seems more relevant)
-# data = {
-# 'txt_filename': 'test.txt',
-# 'txt_contents': 'Some text content',
-# 'csv_filename': 'test.csv',
-# 'csv_contents': 'col1,col2\nval1,val2'
-# }
-# upload_books_url = reverse('upload_books')
-# response = self.client.post(upload_books_url, data, format='multipart') # or 'json' if appropriate
-# self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT) # Or your success status
-# mock_pipeline_instance.setup.assert_called_once()
-# mock_pipeline_instance.analyze_pipeline.assert_called_once()
-pass
-```
-#### c. Asynchronous Code & Channels Tests
-- **Purpose:** Specifically test your Django Channels consumers.
-- **Focus Areas:**
-- WebSocket connection, disconnection.
-- Message reception and processing (e.g., `start_processing` action in `ProgressConsumer`).
-- Messages sent back to the client (progress updates, errors).
-- Interaction with `asyncio.to_thread` and the underlying business logic (`Runner`).
-- **Tools:** `channels.testing.WebsocketCommunicator`.
-- **Example (Consumer Test):**
-```python
-# source/django_layer/api/tests.py
-import pytest # If using pytest
-from channels.testing import WebsocketCommunicator
-from django_layer.character_net.asgi import application # Your ASGI application
-# from unittest.mock import patch, MagicMock
-# @pytest.mark.asyncio # If using pytest-asyncio
-# class TestProgressConsumer:
-# async def test_connect_and_start_processing(self):
-# communicator = WebsocketCommunicator(application, "/ws/progress/")
-# connected, _ = await communicator.connect()
-# self.assertTrue(connected)
-# with patch('source.django_layer.api.consumers.Runner') as MockRunner:
-# mock_runner_instance = MagicMock()
-# MockRunner.return_value = mock_runner_instance
-# # Mock methods of runner_instance if needed, e.g., await asyncio.to_thread(...)
-# await communicator.send_json_to({'action': 'start_processing', 'files': {'txt': 'book.txt'}})
-# # Check for initial message from consumer
-# response = await communicator.receive_json_from()
-# self.assertIn("Backend received 'start_processing'", response['message'])
-# # Check for progress messages (this will require careful mocking of Runner and asyncio.to_thread)
-# # Example:
-# # response = await communicator.receive_json_from() # First progress
-# # self.assertEqual(response['increment'], 5.0)
-# # ... more checks for other messages ...
-# # Ensure processing task was created (this is harder to directly test without deeper hooks or side effects)
-# # MockRunner.assert_called_once_with(series="witcher") # Or based on your logic
-# # mock_runner_instance.load_book.assert_called_once() # Or similar for your async calls
-# await communicator.disconnect()
-pass
-```
-### 3. Testing Strategy Steps
-1.  **Prioritize Critical Paths:** Start by writing tests for the most critical functionalities – typically file upload and the main processing flow via WebSockets.
-2.  **Isolate Business Logic:** If `Runner` and `EntityNetworkPipeline` are complex, consider testing them separately with their own suite of unit and integration tests, mocking Django-specific parts if necessary.
-3.  **Mock External Dependencies:**
-* Use `unittest.mock.patch` to mock file system operations, external API calls, and potentially even database interactions for unit tests.
-* For asynchronous tasks run with `asyncio.to_thread`, you might need to patch `asyncio.to_thread` itself or the function being called within it to control its behavior during tests.
-4.  **Cover Edge Cases and Errors:** Test for invalid inputs, file type errors, processing failures, and how your application handles and reports these.
-5.  **Achieve Good Coverage:** Aim for a reasonable level of test coverage. Tools like `coverage.py` can help measure this.
-6.  **Run Tests Frequently:** Integrate tests into your development workflow. Run them before committing changes and as part of any CI/CD pipeline.
----
 ## Ⅱ. Backend Refactoring Guide
-The goal here is to improve the structure for better separation of concerns, maintainability, and scalability.
+The goal here is to improve the structure for better separation of concerns, maintainability, and scalability
+
 ### Current Structure Observations:
 * Django project: `character_net`
 * Main app: `api` within `django_layer`
 * Core logic (book processing, NLP) seems to be in `scripts.runner` and `nlp_processing.entity_network_from_filedata`, which are invoked by `api/consumers.py` and `api/views.py`.
 * Uses Django Channels for async tasks and WebSockets.
-* `api/models.py` is currently empty.
+* `api/models.py` is currently empty
+* 
 ### Step 1: Define a Clearer Project and App Structure
 The current `django_layer` folder contains both the Django project (`character_net`) and the `api` app. While functional, you might consider a more standard Django layout:
 ```
@@ -188,6 +52,7 @@ your_project_root/
 └── start.bat
 ```
 **Actions:**
+
 1.  **Create `apps` directory:** `mkdir source/apps`
 2.  **Move `api` app:** `mv source/django_layer/api source/apps/`
 3.  **Update `INSTALLED_APPS`:** In `source/character_net/settings.py`, change `'django_layer.api'` to `'apps.api'`. Update `apps.api.apps.ApiConfig` name attribute if necessary (it currently is `django_layer.api`).
@@ -197,6 +62,8 @@ your_project_root/
 * Update `ROOT_URLCONF = 'character_net.urls'` in `settings.py`.
 * Update `ASGI_APPLICATION = 'character_net.asgi.application'` in `settings.py`.
 * Adjust `BASE_DIR` in `settings.py` if necessary. Currently: `Path(__file__).resolve().parent.parent`. If `settings.py` is in `source/character_net/`, then `BASE_DIR` should be `Path(__file__).resolve().parent.parent` to point to `source/`. This seems correct.
+
+
 ### Step 2: Introduce a Service Layer for Business Logic
 Your views and consumers currently call directly into what seems like utility/scripting modules (`scripts.runner`, `nlp_processing`). Encapsulating this logic in a dedicated service layer within your Django apps will make it more organized, testable, and reusable.
 **Actions:**
