@@ -97,21 +97,23 @@ class TestProgressConsumer:
         mock_runner_instance.entity_filter.export_filtered_dataframe.return_value = "filtered_df"
         mock_runner_instance.relationship_builder.aggregate_network.return_value = "relationship_df"
 
-        mock_path_instance = MagicMock()
-        mock_path_instance.exists.return_value = True
-        mock_path_instance.as_uri.return_value = "file:///path/to/The%20Last%20Wish.html"
-        mock_path.return_value = mock_path_instance
+        mock_html_path = MagicMock()
+        mock_html_path.exists.return_value = True
+        mock_html_path.as_uri.return_value = "file:///path/to/The%20Last%20Wish.html"
+
+        mock_path.return_value = mock_html_path
 
         async def mock_to_thread_func(func, *args, **kwargs):
             return func(*args, **kwargs)
 
         mock_to_thread.side_effect = mock_to_thread_func
 
-        await consumer.run_book_processing("witcher", 1)
+        await consumer.run_book_processing("witcher", 1, open_html=True)
 
         assert consumer.send.await_count >= 6
 
-        mock_open_tab.assert_called_once()
+        mock_open_tab.assert_called_once_with(mock_html_path.as_uri())
+
         consumer.close.assert_awaited_once()
 
     @patch('source.django_layer.api.consumers.Runner')
